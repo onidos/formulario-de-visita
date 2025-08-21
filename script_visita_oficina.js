@@ -212,49 +212,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
     
     // Lógica para os botões "Sim" e "Não"
-    const simNaoButtons = document.querySelectorAll('.sim-nao-btn');
-    if (simNaoButtons.length > 0) {
-        simNaoButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const resposta = this.getAttribute('data-value');
-                const proximoCardId = this.getAttribute('data-next');
-                
-                const currentCard = this.closest('.card');
-                const currentCardId = currentCard.id.replace('card-', '');
-                
-                const comentarioInput = currentCard.querySelector('textarea');
-                const hiddenInput = currentCard.querySelector('input[type="hidden"]');
-                
-                // Válida o comentário somente para o CARD-8
-                if (currentCardId === '8') {
-                    if (comentarioInput && !comentarioInput.value.trim()) {
-                        alert('Por favor, preencha o campo de comentário para continuar.');
-                        comentarioInput.style.border = '1px solid red';
-                        return;
-                    } else if (comentarioInput) {
-                        comentarioInput.style.border = '';
-                    }
+    // Lógica para os botões "Sim" e "Não"
+const simNaoButtons = document.querySelectorAll('.sim-nao-btn');
+if (simNaoButtons.length > 0) {
+    simNaoButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const resposta = this.getAttribute('data-value');
+            const proximoCardId = this.getAttribute('data-next');
+            
+            const currentCard = this.closest('.card');
+            const currentCardId = currentCard.id.replace('card-', '');
+            
+            const comentarioInput = currentCard.querySelector('textarea');
+            const hiddenInput = currentCard.querySelector('input[type="hidden"]');
+            
+            // Válida o comentário para os CARDS 4, 5, 6 e 8, se a resposta for 'Nao'
+            if ((currentCardId === '4' || currentCardId === '5' || currentCardId === '6' || currentCardId === '8') && resposta === 'Nao') {
+                if (comentarioInput && !comentarioInput.value.trim()) {
+                    alert('Por favor, preencha o campo de comentário para continuar, pois sua resposta foi "Não".');
+                    comentarioInput.style.border = '1px solid red';
+                    return;
+                } else if (comentarioInput) {
+                    comentarioInput.style.border = '';
                 }
-
-                if (hiddenInput) {
-                    hiddenInput.value = resposta;
+            } else if ((currentCardId === '4' || currentCardId === '5' || currentCardId === '6' || currentCardId === '8') && resposta === 'Sim') {
+                // Se a resposta for "Sim", limpa o campo de comentário e remove a borda vermelha
+                if (comentarioInput) {
+                    comentarioInput.value = '';
+                    comentarioInput.style.border = '';
                 }
+            }
 
-                // NOVA LÓGICA DE REDIRECIONAMENTO
-                if (currentCardId === '6') {
-                    if (tipoOficinaSelecionado === 'Externa') {
-                        window.location.href = 'oficina_externa.html';
-                    } else if (tipoOficinaSelecionado === 'Interna' || tipoOficinaSelecionado === 'Movel') {
-                        window.location.href = 'oficina_interna_movel.html';
-                    } else {
-                        showCard(proximoCardId);
-                    }
+            if (hiddenInput) {
+                hiddenInput.value = resposta;
+            }
+
+            // Lógica de redirecionamento, se aplicável
+            if (currentCardId === '6') {
+                if (tipoOficinaSelecionado === 'Externa') {
+                    window.location.href = 'oficina_externa.html';
+                } else if (tipoOficinaSelecionado === 'Interna' || tipoOficinaSelecionado === 'Movel') {
+                    window.location.href = 'oficina_interna_movel.html';
                 } else {
                     showCard(proximoCardId);
                 }
-            });
+            } else {
+                showCard(proximoCardId);
+            }
         });
-    }
+    });
+}
 
     // LÓGICA PARA O BOTÃO DE GEOLOCALIZAÇÃO
     if (getLocationButton) {
