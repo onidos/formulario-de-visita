@@ -163,6 +163,14 @@ button {
 }
 
 #card-7.card textarea,
+#card-7-alt.card textarea,
+#card-8-alt.card textarea,
+#card-9-alt.card textarea,
+#card-10-alt.card textarea,
+#card-11-alt.card textarea,
+#card-12-alt.card textarea,
+#card-13-alt.card textarea,
+#card-14-alt.card textarea,
 #card-8.card textarea {
     width: 100%;
 }
