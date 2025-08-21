@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento de Visitas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <img src="imagens/logo.png" alt="Logo da Unidas" class="logo">
+        <form id="agendamento-form" action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSes2kOQFMb-LEs1_lXAxZvuWTFINGyz2E68VYm6KCuiG3dRAg/formResponse" method="POST">
+            <div class="card" id="card-0">
+                <h2>Registro de Visita Oficina</h2>
+                <p>Por favor, clique em "Iniciar" para registrar uma vista a uma Oficina.</p>
+                <div class="navigation-buttons">
+                    <button type="button" class="next-btn" data-card="1">Iniciar</button>
+                </div>
+            </div>
+            <div class="card" id="card-1" style="display: none;">
+                <h2>Analista</h2>
+                <div class="input-group">
+                    <label for="nome">Nome Completo</label>
+                    <input type="text" id="nome " name="entry.1028512610" required>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="0">Anterior</button>
+                    <button type="button" class="next-btn" data-card="2">Próximo</button>
+                </div>
+            </div>
+
+
+            <div class="card" id="card-2" style="display: none;">
+            <h2>Oficina</h2>
+            <div class="input-group">
+                <label for="loja">Informe a Oficina</label>
+                <input type="text" id="loja" name="entry.976127741" placeholder="Digite o nome da oficina" required>
+            </div>
+
+            <div class="input-group">
+                <label for="tipo-oficina">Tipo de Oficina</label>
+                <select id="tipo-oficina" name="entry.2075150680" required>
+                    <option value="" disabled selected>Selecione um serviço</option>
+                    <option value="Interna">Interna</option>
+                    <option value="Externa">Externa</option>
+                    <option value="Movel">Móvel</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="servico">Tipo de Serviço Realizado</label>
+                <select id="servico" name="entry.1998629562" multiple required>
+                    <option value="" disabled selected>Selecione um serviço</option>
+                    <option value="Preventiva">Preventiva</option>
+                    <option value="Corretiva">Corretiva</option>
+                    <option value="Sinistro">Sinistro</option>
+                </select>
+            </div>
+            <div class="navigation-buttons">
+                <button type="button" class="prev-btn" data-card="1">Anterior</button>
+                <button type="button" class="next-btn" data-card="3">Próximo</button>
+            </div>
+        </div>
+
+
+            <div class="card" id="card-3" style="display: none;">
+                <h2>Data, Hora e Local</h2>                
+                <div class="input-group">
+                    <label for="data-visita">Data da Visita</label>
+                    <input type="date" id="data-visita" name="entry.1355612396" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="horario-visita">Horário da Visita</label>
+                    <input type="time" id="horario-visita" name="entry.638867631" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="endereco">Sua localização</label>
+                    <input type="text" id="endereco" name="entry.628160829" placeholder="Digite seu endereço" required>
+                    <button type="button" id="get-location">Usar minha localização</button>
+                    <input type="hidden" id="latitude" name="latitude">
+                    <input type="hidden" id="longitude" name="longitude">
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="2">Anterior</button>
+                    <button type="button" class="next-btn" data-card="4">Próximo</button>
+                    
+                </div>
+            </div>
+
+
+            <div class="card" id="card-4" style="display: none;">
+                <h3>Área 1 | Estrutura de Loja</h3>
+                <h2>Estrutura da Oficina</h2>
+                <div class="input-group">
+                    <label>A fachada e entrada da oficina está em bom estado de conservação (identificação, iluminação)?</label>
+                    <div class="navigation-buttons">
+                        <button type="button" class="sim-nao-btn" data-value="Sim" data-next="5">Sim</button>
+                        <button type="button" class="sim-nao-btn" data-value="Nao" data-next="5">Não</button>
+                    </div>
+
+                    <div class="input-group">
+                    <label for="comentario">Por favor, descreva o que precisa ser melhorado.</label>
+                    <textarea id="comentario" name="entry.1052921922" rows="5" placeholder="Seu comentário aqui..."></textarea>
+                    </div>
+
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="3">Anterior</button>
+                </div>
+                <input type="hidden" id="resposta-sala-oficina" name="entry.1799719036">
+            </div>
+
+
+
+            <div class="card" id="card-5" style="display: none;">
+                <h3>Área 1 | Estrutura de Loja</h3>
+                <h2>Guarda dos Veículos</h2>
+                <div class="input-group">
+                    <label>A guarda dos veículos está de acordo com os padrões da organização?</label>
+                    <div class="navigation-buttons">
+                        <button type="button" class="sim-nao-btn" data-value="Sim" data-next="6">Sim</button>
+                        <button type="button" class="sim-nao-btn" data-value="Nao" data-next="6">Não</button>
+                    </div>
+
+                    <div class="input-group">
+                    <label for="comentario">Por favor, descreva o que precisa ser melhorado.</label>
+                    <textarea id="comentario" name="entry.948053513" rows="5" placeholder="Seu comentário aqui..."></textarea>
+                    </div>
+
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="4">Anterior</button>
+                </div>
+                <input type="hidden" id="resposta-organizacao-oficina" name="entry.2033108322">
+            </div>
+
+
+
+             <div class="card" id="card-6" style="display: none;">
+                <h3>Área 1 | Estrutura de Loja</h3>
+                <h2>Equipe</h2>
+                <div class="input-group">
+                    <label>A apresentação pessoal da equipe está dentro da orientação da empresa (funcionários uniformizados e utilização de epi)?</label>
+                    <div class="navigation-buttons">
+                        <button type="button" class="sim-nao-btn" data-value="Sim" data-next="25">Sim</button>
+                        <button type="button" class="sim-nao-btn" data-value="Nao" data-next="25">Não</button>
+                    </div>
+
+                    <div class="input-group">
+                    <label for="comentario">Por favor, descreva o que precisa ser melhorado.</label>
+                    <textarea id="comentario" name="entry.2038913212" rows="5" placeholder="Seu comentário aqui..."></textarea>
+                    </div>
+
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="5">Anterior</button>
+                </div>
+                <input type="hidden" id="resposta-organizacao-oficina" name="entry.2085110820">
+            </div>
+            
+
+                     
+            
+
+            <div class="card" id="card-25" style="display: none;">
+                <button type="button" class="prev-btn" data-card="5">Anterior</button>
+                <button type="submit" id="submit-form">Enviar Registro</button>
+            </div>
+
+            </form>
+        
+        
+
+        
+        <div class="progress-bar-container">
+            <div class="progress-dot active" data-card="0"></div>
+            <div class="progress-dot" data-card="1"></div>
+            <div class="progress-dot" data-card="2"></div>
+            <div class="progress-dot" data-card="3"></div>
+        </div>
+    </div>
+
+    <script src="script_visita_oficina.js"></script>
+</body>
+</html>

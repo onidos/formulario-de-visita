@@ -1,0 +1,168 @@
+/* Estilos gerais da página */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #0051AA; /* Nova cor de fundo azul */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 600px; /* Largura máxima para tablets */
+    background-color: #fff; /* Fundo branco do cartão */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Estilo para o logo */
+.logo {
+    display: block;
+    max-width: 150px;
+    margin: 0 auto 20px;
+    border-radius: 8px; /* Adicionado para arredondar os cantos da imagem */
+}
+
+/* Estilos dos cartões (seções) */
+.card {
+    padding: 20px;
+}
+
+h2 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h3 {
+    color: #0051AA;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Estilos dos campos de entrada */
+.input-group {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+input[type="text"],
+input[type="tel"],
+input[type="email"],
+input[type="date"],
+input[type="time"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+/* Estilos dos botões */
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+button {
+    padding: 12px 24px;
+    font-size: 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.next-btn, #submit-form {
+    background-color: #0051AA; /* Nova cor principal azul */
+    color: #fff;
+}
+
+.prev-btn {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.next-btn:hover, #submit-form:hover {
+    background-color: #003c80; /* Tom mais escuro para o hover */
+}
+
+.prev-btn:hover {
+    background-color: #d0d0d0;
+}
+
+/* Estilos da barra de progresso */
+.progress-bar-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.progress-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ccc;
+    transition: background-color 0.3s ease;
+}
+
+.progress-dot.active {
+    background-color: #0051AA; /* Nova cor principal azul */
+}
+
+/* Estilo para telas menores (smartphones) */
+@media (max-width: 600px) {
+    .container {
+        max-width: 100%;
+        margin: 0;
+        padding: 10px;
+        border-radius: 0;
+    }
+}
+
+.sim-nao-btn {
+    padding: 15px 50px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    margin: 15px;
+}
+
+
+.sim-nao-btn:hover {
+    background-color: #b30000;
+}
+
+#card-4 .input-group textarea,
+#card-5 .input-group textarea,
+#card-6 .input-group textarea,
+#card-7 .input-group textarea{
+    width: 100%;
+}
+
+#card-7.card textarea,
+#card-8.card textarea {
+    width: 100%;
+}

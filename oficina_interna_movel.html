@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visita - Oficina Interna/Móvel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <img src="imagens/logo.png" alt="Logo da Unidas" class="logo">
+        <form id="agendamento-form" action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSes2kOQFMb-LEs1_lXAxZvuWTFINGyz2E68VYm6KCuiG3dRAg/formResponse" method="POST">
+            
+            <div class="card" id="card-7-alt">
+                <h3>Área 2 | Processos</h3>
+                <h2>Perguntas Adicionais</h2>
+                <div class="input-group">
+                    <label>1- Os processos estão dentro do padrão da empresa (materiais bem guardados e organizados, local limpo e sem manchas, funcionários uniformizados e utilização de epi)?</label>
+                    <div class="navigation-buttons">
+                        <button type="button" class="sim-nao-btn" data-value="Sim" data-next="8-alt">Sim</button>
+                        <button type="button" class="sim-nao-btn" data-value="Nao" data-next="8-alt">Não</button>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="comentario">Por favor, descreva o que precisa ser melhorado.</label>
+                    <textarea id="comentario" name="entry.9876543210" rows="5" placeholder="Seu comentário aqui..."></textarea>
+                </div>
+                <input type="hidden" id="resposta-processos" name="entry.1122334455">
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="6">Anterior</button>
+                </div>
+            </div>
+
+            </form>
+    </div>
+    
+    <script src="script_visita_oficina.js"></script>
+</body>
+</html>
