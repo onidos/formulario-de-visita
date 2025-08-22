@@ -30,11 +30,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const inputs = card.querySelectorAll('[required]');
         let isValid = true;
         inputs.forEach(input => {
-            if (!input.value.trim()) {
-                isValid = false;
-                input.style.border = '1px solid red';
+            if (input.tagName === 'SELECT') {
+                // Validação para campos <select>
+                const selectedOptions = Array.from(input.options).filter(option => option.selected && option.value !== "");
+                if (selectedOptions.length === 0) {
+                    isValid = false;
+                    input.style.border = '1px solid red';
+                } else {
+                    input.style.border = '';
+                }
             } else {
-                input.style.border = '';
+                // Validação para campos de texto, data, etc.
+                if (!input.value.trim()) {
+                    isValid = false;
+                    input.style.border = '1px solid red';
+                } else {
+                    input.style.border = '';
+                }
             }
         });
         return isValid;
@@ -126,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Lógica de geolocalização e autocomplete (seu código já está bom)
+    // Lógica de geolocalização e autocomplete
     if (getLocationButton) {
         getLocationButton.addEventListener('click', () => {
             if (navigator.geolocation) {
@@ -163,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Lógica de Autocomplete (seu código já está bom)
+    // Lógica de Autocomplete
     let autocompleteTimeout = null;
     const autocompleteList = document.createElement('ul');
     autocompleteList.id = 'autocomplete-list';
