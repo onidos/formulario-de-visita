@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sucesso!</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .success-card {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        .success-card h1 {
+            color: #4CAF50;
+        }
+        .success-card p {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .success-card button {
+            background-color: #004d99;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .success-card button:hover {
+            background-color: #003366;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-card">
+        <h1>Formulário Enviado com Sucesso!</h1>
+        <p>Sua visita foi registrada.</p>
+        <button id="novo-formulario-btn">Inserir Novo Formulário</button>
+    </div>
+
+    <script>
+        document.getElementById('novo-formulario-btn').addEventListener('click', () => {
+            window.location.href = 'index_visita_oficina.html'; // Altere para o nome do seu arquivo HTML principal
+        });
+    </script>
+</body>
+</html>

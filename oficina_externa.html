@@ -12,141 +12,268 @@
         <img src="imagens/logo.png" alt="Logo da Unidas" class="logo">
         <form id="agendamento-form" action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSes2kOQFMb-LEs1_lXAxZvuWTFINGyz2E68VYm6KCuiG3dRAg/formResponse" method="POST">
             
-            <div class="card" id="card-7">
+            <div class="card" id="card-1">
+                <h2>Analista</h2>
+                <div class="input-group">
+                    <label for="nome">Nome Completo</label>
+                    <input type="text" id="nome" name="entry.1028512610" required>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="next-btn" data-card="2">Próximo</button>
+                </div>
+            </div>
+
+            <div class="card" id="card-2" style="display: none;">
+                <h2>Oficina</h2>
+                <div class="input-group">
+                    <label for="loja">Informe a Oficina</label>
+                    <input type="text" id="loja" name="entry.976127741" placeholder="Digite o nome da oficina" required>
+                </div>
+                <div class="input-group">
+                    <label for="servico">Tipo de Serviço Realizado</label>
+                    <select id="servico" name="entry.1998629562" multiple required>
+                        <option value="" disabled selected>Selecione um serviço</option>
+                        <option value="Preventiva">Preventiva</option>
+                        <option value="Corretiva">Corretiva</option>
+                        <option value="Sinistro">Sinistro</option>
+                    </select>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="1">Anterior</button>
+                    <button type="button" class="next-btn" data-card="3">Próximo</button>
+                </div>
+            </div>
+
+            <div class="card" id="card-3" style="display: none;">
+                <h2>Data, Hora e Local</h2>                
+                <div class="input-group">
+                    <label for="data-visita">Data da Visita</label>
+                    <input type="date" id="data-visita" name="entry.1355612396" required>
+                </div>
+                <div class="input-group">
+                    <label for="horario-visita">Horário da Visita</label>
+                    <input type="time" id="horario-visita" name="entry.638867631" required>
+                </div>
+                <div class="input-group">
+                    <label for="endereco">Sua localização</label>
+                    <input type="text" id="endereco" name="entry.628160829" placeholder="Digite seu endereço" required>
+                    <button type="button" id="get-location">Usar minha localização</button>
+                    <input type="hidden" id="latitude" name="latitude">
+                    <input type="hidden" id="longitude" name="longitude">
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="2">Anterior</button>
+                    <button type="button" class="next-btn" data-card="4">Próximo</button>
+                </div>
+            </div>
+
+            <div class="card" id="card-4" style="display: none;">
+                <h3>Área 1 | Estrutura de Loja</h3>
+                <h2>Estrutura da Oficina</h2>
+                <div class="input-group">
+                    <label>A fachada e entrada da oficina está em bom estado de conservação (identificação, iluminação)?</label>
+                    <div class="navigation-buttons">
+                        <button type="button" class="sim-nao-btn" data-value="Sim" data-next="5">Sim</button>
+                        <button type="button" class="sim-nao-btn" data-value="Nao" data-next="5">Não</button>
+                    </div>
+                    <div class="input-group">
+                        <label for="comentario-4">Por favor, descreva o que precisa ser melhorado.</label>
+                        <textarea id="comentario-4" name="entry.1052921922" rows="5" placeholder="Seu comentário aqui..."></textarea>
+                    </div>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="3">Anterior</button>
+                </div>
+                <input type="hidden" id="resposta-fachada" name="entry.1799719036">
+            </div>
+
+            <div class="card" id="card-5" style="display: none;">
+                <h3>Área 1 | Estrutura de Loja</h3>
+                <h2>Guarda dos Veículos</h2>
+                <div class="input-group">
+                    <label>A guarda dos veículos está de acordo com os padrões da organização?</label>
+                    <div class="navigation-buttons">
+                        <button type="button" class="sim-nao-btn" data-value="Sim" data-next="6">Sim</button>
+                        <button type="button" class="sim-nao-btn" data-value="Nao" data-next="6">Não</button>
+                    </div>
+                    <div class="input-group">
+                        <label for="comentario-5">Por favor, descreva o que precisa ser melhorado.</label>
+                        <textarea id="comentario-5" name="entry.948053513" rows="5" placeholder="Seu comentário aqui..."></textarea>
+                    </div>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="4">Anterior</button>
+                </div>
+                <input type="hidden" id="resposta-guarda" name="entry.2033108322">
+            </div>
+
+            <div class="card" id="card-6" style="display: none;">
+                <h3>Área 1 | Estrutura de Loja</h3>
+                <h2>Equipe</h2>
+                <div class="input-group">
+                    <label>A apresentação pessoal da equipe está dentro da orientação da empresa (funcionários uniformizados e utilização de epi)?</label>
+                    <div class="navigation-buttons">
+                        <button type="button" class="sim-nao-btn" data-value="Sim" data-next="7">Sim</button>
+                        <button type="button" class="sim-nao-btn" data-value="Nao" data-next="7">Não</button>
+                    </div>
+                    <div class="input-group">
+                        <label for="comentario-6">Por favor, descreva o que precisa ser melhorado.</label>
+                        <textarea id="comentario-6" name="entry.2038913212" rows="5" placeholder="Seu comentário aqui..."></textarea>
+                    </div>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="5">Anterior</button>
+                </div>
+                <input type="hidden" id="resposta-equipe" name="entry.2085110820">
+            </div>
+            
+            <div class="card" id="card-7" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Externa</h3>
                 <div class="input-group">
                     <label>1- A oficina possui cabine de pintura e maquinários que oferecem um serviço de qualidade e agilidade?</label>
                 </div>
-                
                 <div class="navigation-buttons">
                     <button type="button" class="sim-nao-btn" data-value="Sim" data-next="8">Sim</button>
                     <button type="button" class="sim-nao-btn" data-value="Nao" data-next="8">Não</button>
                 </div>
-
                 <div class="input-group">
-                    <label for="comentario">Por favor, descreva o que precisa ser melhorado.</label>
-                    <textarea id="comentario" name="entry.2038913212" rows="5" placeholder="Seu comentário aqui..."></textarea>
+                    <label for="comentario-7">Por favor, descreva o que precisa ser melhorado.</label>
+                    <textarea id="comentario-7" name="entry.2038913212" rows="5" placeholder="Seu comentário aqui..."></textarea>
                 </div>
-
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="6">Anterior</button>
+                </div>
             </div>
 
-
-
-            <div class="card" id="card-8">
+            <div class="card" id="card-8" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Externa</h3>
                 <div class="input-group">
                     <label>2- A oficina possui sala de espera? Se sim, Comente (local confortável, climatização)</label>
                 </div>
-                
                 <div class="navigation-buttons">
                     <button type="button" class="sim-nao-btn" data-value="Sim" data-next="9">Sim</button>
                     <button type="button" class="sim-nao-btn" data-value="Nao" data-next="9">Não</button>
                 </div>
-
                 <div class="input-group">
-                    <label for="comentario">Por favor, descreva o que precisa ser melhorado.</label>
-                    <textarea id="comentario" name="entry.2038913212" rows="5" placeholder="Seu comentário aqui..." required></textarea>
+                    <label for="comentario-8">Por favor, descreva o que precisa ser melhorado.</label>
+                    <textarea id="comentario-8" name="entry.2038913212" rows="5" placeholder="Seu comentário aqui..." required></textarea>
                 </div>
                 <div class="navigation-buttons">
                     <button type="button" class="prev-btn" data-card="7">Anterior</button>
                 </div>
-
             </div>
 
-
-            <div class="card" id="card-9">
-            <h3>Área 2 | Informações Sobre Oficina Externa</h3>
-            <div class="input-group">
-                <label>3- Quantos veículos temos em manutenção dentro da oficina no momento?</label>
+            <div class="card" id="card-9" style="display: none;">
+                <h3>Área 2 | Informações Sobre Oficina Externa</h3>
+                <div class="input-group">
+                    <label>3- Quantos veículos temos em manutenção dentro da oficina no momento?</label>
+                </div>
+                <div class="input-group">
+                    <label for="veiculos-total">Número de Veículos:</label>
+                    <input type="number" id="veiculos-total" name="entry.2038913212" placeholder="Digite a quantidade total" required>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="8">Anterior</button>
+                    <button type="button" class="next-btn" data-card="10">Próximo</button>
+                </div>
             </div>
 
-            <div class="input-group">
-                <label for="veiculos-total">Número de Veículos:</label>
-                <input type="number" id="veiculos-total" name="entry.2038913212" placeholder="Digite a quantidade total" required>
+            <div class="card" id="card-10" style="display: none;">
+                <h3>Área 2 | Informações Sobre Oficina Externa</h3>
+                <div class="input-group">
+                    <label>4- Quantos veículos pendentes de aprovação?</label>
+                </div>
+                <div class="input-group">
+                    <label for="veiculos-pendentes">Número de Veículos:</label>
+                    <input type="number" id="veiculos-pendentes" name="entry.1234567890" placeholder="Digite a quantidade" required>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="9">Anterior</button>
+                    <button type="button" class="next-btn" data-card="11">Próximo</button>
+                </div>
             </div>
 
-            <div class="navigation-buttons">
-                <button type="button" class="prev-btn" data-card="8">Anterior</button>
-                <button type="button" class="next-btn" data-card="10">Próximo</button>
-            </div>
-        </div>
-
-        <div class="card" id="card-10">
-            <h3>Área 2 | Informações Sobre Oficina Externa</h3>
-            <div class="input-group">
-                <label>4- Quantos veículos pendentes de aprovação?</label>
-            </div>
-
-            <div class="input-group">
-                <label for="veiculos-pendentes">Número de Veículos:</label>
-                <input type="number" id="veiculos-pendentes" name="entry.1234567890" placeholder="Digite a quantidade" required>
+            <div class="card" id="card-11" style="display: none;">
+                <h3>Área 2 | Informações Sobre Oficina Externa</h3>
+                <div class="input-group">
+                    <label>5- Quantos veículos em serviço aprovados?</label>
+                </div>
+                <div class="input-group">
+                    <label for="veiculos-aprovados">Número de Veículos:</label>
+                    <input type="number" id="veiculos-aprovados" name="entry.9876543210" placeholder="Digite a quantidade" required>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="10">Anterior</button>
+                    <button type="button" class="next-btn" data-card="12">Próximo</button>
+                </div>
             </div>
 
-            <div class="navigation-buttons">
-                <button type="button" class="prev-btn" data-card="9">Anterior</button>
-                <button type="button" class="next-btn" data-card="11">Próximo</button>
-            </div>
-        </div>
-
-        <div class="card" id="card-11">
-            <h3>Área 2 | Informações Sobre Oficina Externa</h3>
-            <div class="input-group">
-                <label>5- Quantos veículos em serviço aprovados?</label>
-            </div>
-
-            <div class="input-group">
-                <label for="veiculos-aprovados">Número de Veículos:</label>
-                <input type="number" id="veiculos-aprovados" name="entry.9876543210" placeholder="Digite a quantidade" required>
+            <div class="card" id="card-12" style="display: none;">
+                <h3>Área 2 | Informações Sobre Oficina Externa</h3>
+                <div class="input-group">
+                    <label>6- Quantos veículos aguardando peças?</label>
+                </div>
+                <div class="input-group">
+                    <label for="veiculos-aguardando">Número de Veículos:</label>
+                    <input type="number" id="veiculos-aguardando" name="entry.5678901234" placeholder="Digite a quantidade" required>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="11">Anterior</button>
+                    <button type="button" class="next-btn" data-card="13">Próximo</button>
+                </div>
             </div>
 
-            <div class="navigation-buttons">
-                <button type="button" class="prev-btn" data-card="10">Anterior</button>
-                <button type="button" class="next-btn" data-card="12">Próximo</button>
-            </div>
-        </div>
-
-        <div class="card" id="card-12">
-            <h3>Área 2 | Informações Sobre Oficina Externa</h3>
-            <div class="input-group">
-                <label>6- Quantos veículos aguardando peças?</label>
-            </div>
-
-            <div class="input-group">
-                <label for="veiculos-aguardando">Número de Veículos:</label>
-                <input type="number" id="veiculos-aguardando" name="entry.5678901234" placeholder="Digite a quantidade" required>
+            <div class="card" id="card-13" style="display: none;">
+                <h3>Área 2 | Informações Sobre Oficina Externa</h3>
+                <div class="input-group">
+                    <label>7- Deste volume quantos seriam entregues no dia atual?</label>
+                </div>
+                <div class="input-group">
+                    <label for="veiculos-entregues">Número de Veículos:</label>
+                    <input type="number" id="veiculos-entregues" name="entry.1234567890" placeholder="Digite a quantidade" required>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="12">Anterior</button>
+                    <button type="button" class="next-btn" data-card="14">Próximo</button>
+                </div>
             </div>
 
-            <div class="navigation-buttons">
-                <button type="button" class="prev-btn" data-card="11">Anterior</button>
-                <button type="button" class="next-btn" data-card="13">Próximo</button>
+            <div class="card" id="card-14" style="display: none;">
+                <h3>Área 2 | Informações Sobre Oficina Externa</h3>
+                <div class="input-group">
+                    <label>8- Existe necessidade de aumento de fornecedores?</label>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="sim-nao-btn" data-value="Sim" data-next="15">Sim</button>
+                    <button type="button" class="sim-nao-btn" data-value="Nao" data-next="15">Não</button>
+                </div>
+                <div class="input-group">
+                    <label for="necessidade-aumento-fornecedores">Número de Fornecedores:</label>
+                    <input type="number" id="necessidade-aumento-fornecedores" name="entry.5678901234" placeholder="Digite a quantidade">
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="13">Anterior</button>
+                </div>
             </div>
-        </div>
 
-
-        <div class="card" id="card-13">
-            <h3>Área 2 | Informações Sobre Oficina Externa</h3>
-            <div class="input-group">
-                <label>7- Deste volume quantos seriam entregues no dia atual?</label>
+            <div class="card" id="card-15" style="display: none;">
+                <h3>Área 2 | Informações Sobre Oficina Externa</h3>
+                <div class="input-group">
+                    <label>9- Realizar identificação dos 3 veículos a mais tempo no improdutivo, considerando os itens: identificação da etapa do processo de reparação, averiguação física do estado de conservação do veículo, solicitação e acompanhamento do prazo estipulado para entrega do carro.</label>
+                </div>
+                <div class="input-group">
+                    <label for="comentario-9">Comentário:</label>
+                    <textarea id="comentario-9" name="entry.1234567890" rows="5" placeholder="Descreva os 3 veículos mais antigos e as ações..."></textarea>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="14">Anterior</button>
+                    <button type="submit" class="submit-btn">Enviar Registro</button>
+                </div>
             </div>
-
-            <div class="input-group">
-                <label for="veiculos-entregues">Número de Veículos:</label>
-                <input type="number" id="veiculos-entregues" name="entry.1234567890" placeholder="Digite a quantidade" required>
-            </div>
-
-            <div class="navigation-buttons">
-                <button type="button" class="prev-btn" data-card="12">Anterior</button>
-                <button type="button" class="next-btn" data-card="14">Próximo</button>
-            </div>
-        </div>
-
-
-        
-
-
-            </form>
+            
+        </form>
     </div>
-
-    <script src="script_visita_oficina.js"></script> 
+    
+    <script src="script_oficina_externa.js"></script> 
 </body>
 </html>
