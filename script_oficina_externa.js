@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const enderecoInput = document.getElementById('endereco');
     const latitudeInput = document.getElementById('latitude');
     const longitudeInput = document.getElementById('longitude');
+    
+    // NOVO: Seletor para o botão de início fixo
+    const homeButton = document.getElementById('home-btn');
 
     let currentCardIndex = 0;
 
@@ -31,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let isValid = true;
         inputs.forEach(input => {
             if (input.tagName === 'SELECT') {
-                // Validação para campos <select>
                 const selectedOptions = Array.from(input.options).filter(option => option.selected && option.value !== "");
                 if (selectedOptions.length === 0) {
                     isValid = false;
@@ -40,7 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     input.style.border = '';
                 }
             } else {
-                // Validação para campos de texto, data, etc.
                 if (!input.value.trim()) {
                     isValid = false;
                     input.style.border = '1px solid red';
@@ -63,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const day = now.getDate().toString().padStart(2, '0');
         const hours = now.getHours().toString().padStart(2, '0');
         const minutes = now.getMinutes().toString().padStart(2, '0');
-
         dataInput.value = `${year}-${month}-${day}`;
         horarioInput.value = `${hours}:${minutes}`;
     }
@@ -72,13 +72,61 @@ document.addEventListener('DOMContentLoaded', () => {
     nextButtons.forEach(button => {
         button.addEventListener('click', () => {
             const currentCard = cards[currentCardIndex];
+            const currentCardId = currentCard.id.replace('card-', '');
             const nextCardId = button.dataset.card;
-
-            if (validateCard(currentCard)) {
-                showCard(nextCardId);
-            } else {
+            
+            if (!validateCard(currentCard)) {
                 alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
             }
+
+            // Lógica de validação da soma para o Card 12
+            if (currentCardId === '12') {
+                const veiculosTotalInput = document.getElementById('veiculos-total');
+                const veiculosPendentesInput = document.getElementById('veiculos-pendentes');
+                const veiculosAprovadosInput = document.getElementById('veiculos-aprovados');
+                const veiculosAguardandoInput = document.getElementById('veiculos-aguardando');
+
+                const total = parseInt(veiculosTotalInput.value);
+                const pendentes = parseInt(veiculosPendentesInput.value);
+                const aprovados = parseInt(veiculosAprovadosInput.value);
+                const aguardando = parseInt(veiculosAguardandoInput.value);
+                
+                const soma = pendentes + aprovados + aguardando;
+                
+                if (soma !== total) {
+                    alert(`A soma dos veículos (${soma}) não corresponde ao total de veículos em manutenção (${total}). Por favor, corrija os valores.`);
+                    veiculosTotalInput.style.border = '1px solid red';
+                    veiculosPendentesInput.style.border = '1px solid red';
+                    veiculosAprovadosInput.style.border = '1px solid red';
+                    veiculosAguardandoInput.style.border = '1px solid red';
+                    return;
+                } else {
+                    veiculosTotalInput.style.border = '';
+                    veiculosPendentesInput.style.border = '';
+                    veiculosAprovadosInput.style.border = '';
+                    veiculosAguardandoInput.style.border = '';
+                }
+            }
+            
+            // Lógica de validação para o Card 13
+            if (currentCardId === '13') {
+                const veiculosTotalInput = document.getElementById('veiculos-total');
+                const veiculosEntreguesInput = document.getElementById('veiculos-entregues');
+                
+                const total = parseInt(veiculosTotalInput.value);
+                const entregues = parseInt(veiculosEntreguesInput.value);
+                
+                if (entregues > total) {
+                    alert(`O número de veículos a serem entregues (${entregues}) não pode ser maior que o total de veículos em manutenção (${total}).`);
+                    veiculosEntreguesInput.style.border = '1px solid red';
+                    return;
+                } else {
+                    veiculosEntreguesInput.style.border = '';
+                }
+            }
+
+            showCard(nextCardId);
         });
     });
 
@@ -103,17 +151,25 @@ document.addEventListener('DOMContentLoaded', () => {
             
             let isValid = true;
 
-            // Lógica de validação específica para campos de comentário
-            if (comentarioInput) {
-                // Validação de comentário obrigatório para "Não" (Cards 4, 5, 6, 7, 8)
-                const cardsComComentarioObrigatorioNao = ['4', '5', '6', '7', '8'];
-                if (cardsComComentarioObrigatorioNao.includes(currentCardId) && resposta === 'Nao' && !comentarioInput.value.trim()) {
-                    alert('Por favor, preencha o campo de comentário para continuar, pois sua resposta foi "Não".');
+            // Validação específica para o CARD-8 (Comentário obrigatório para 'Sim')
+            if (currentCardId === '8') {
+                if (resposta === 'Sim' && comentarioInput && !comentarioInput.value.trim()) {
+                    alert('Por favor, preencha o campo de comentário para continuar, pois sua resposta foi "Sim".');
                     comentarioInput.style.border = '1px solid red';
                     isValid = false;
-                } else {
+                } else if (comentarioInput) {
                     comentarioInput.style.border = '';
                 }
+            }
+            
+            // Validação de comentário obrigatório para "Não" (Cards 4, 5, 6, 7)
+            const cardsComComentarioObrigatorioNao = ['4', '5', '6', '7'];
+            if (comentarioInput && cardsComComentarioObrigatorioNao.includes(currentCardId) && resposta === 'Nao' && !comentarioInput.value.trim()) {
+                alert('Por favor, preencha o campo de comentário para continuar, pois sua resposta foi "Não".');
+                comentarioInput.style.border = '1px solid red';
+                isValid = false;
+            } else if (comentarioInput && cardsComComentarioObrigatorioNao.includes(currentCardId)) {
+                comentarioInput.style.border = '';
             }
 
             // Validação de campo de quantidade para "Sim" (Card 14)
@@ -128,7 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // Se a validação passou, atualiza o campo oculto e avança
             if (isValid) {
                 if (hiddenInput) {
                     hiddenInput.value = resposta;
@@ -137,6 +192,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Evento de clique para o botão de retorno fixo (HOME)
+    if (homeButton) {
+        homeButton.addEventListener('click', () => {
+            window.location.href = 'index_visita_oficina.html';
+        });
+    }
 
     // Lógica de geolocalização e autocomplete
     if (getLocationButton) {
@@ -175,7 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Lógica de Autocomplete
     let autocompleteTimeout = null;
     const autocompleteList = document.createElement('ul');
     autocompleteList.id = 'autocomplete-list';
@@ -214,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Evento de submissão do formulário FINAL
     form.addEventListener('submit', (event) => {
-        event.preventDefault(); // Impede o envio padrão
+        event.preventDefault();
 
         const formUrl = form.action;
         const formData = new FormData(form);
