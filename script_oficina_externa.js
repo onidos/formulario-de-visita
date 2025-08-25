@@ -255,17 +255,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+   document.addEventListener('DOMContentLoaded', () => {
+    // ... (rest of your existing code, no changes needed here) ...
+
     if (form) {
-    form.addEventListener('submit', (event) => {
-        const currentCard = cards[currentCardIndex];
-        if (!validateCard(currentCard)) {
-            alert('Por favor, preencha todos os campos obrigatórios.');
-            event.preventDefault(); // Impede o envio se houver erros
-        } else {
-            // 2. Se a validação for bem-sucedida, permite o envio.
-            // Não precisa de "fetch" nem de "preventDefault".
-            alert('Enviando registro. Por favor, aguarde...');
-        }
-    });
-}
+        form.addEventListener('submit', (event) => {
+            const currentCard = cards[currentCardIndex];
+            // Se a validação do último card falhar, impede o envio do formulário.
+            if (!validateCard(currentCard)) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                event.preventDefault(); // Impede o envio se houver erros.
+            }
+            // Se a validação for bem-sucedida, o código continua e o formulário é enviado.
+            // O navegador cuida do envio para o Apps Script e do redirecionamento.
+        });
+    }
+});
 });
