@@ -15,7 +15,8 @@
         <img src="imagens/logo.png" alt="Logo da Unidas" class="logo"> 
         <form id="agendamento-form" 
             action="https://script.google.com/macros/s/AKfycbzlkb2QFp9dpieQllsHVeYeRSEm5GgmOfUXKdSMfQyJJuYjN27vQuE4xRQLJHDLRVUS/exec"
-            method="POST">
+            method="POST"
+            enctype="multipart/form-data">
     
             <div class="card" id="card-1">
                 <h2>Analista</h2>
@@ -283,18 +284,17 @@
 
 
             <div class="card" id="card-16" style="display: none;">
-            <h3>Área 2 | Informações Sobre Oficina Externa</h3>
-            <div class="input-group">
-                <label for="fotos">Fotos (até 10)</label>
-                <input type="file" id="fotos" name="fotos" accept="image/*" multiple>
-            </div>
+                <h3>Área 2 | Informações Sobre Oficina Externa</h3>
+                <div class="input-group">
+                    <label for="fotos">Fotos (até 10)</label>
+                    <input type="file" id="fotos" name="fotos" accept="image/*" multiple>
+                </div>
 
-            <div class="navigation-buttons">
-                <button type="button" class="prev-btn" data-card="15">Anterior</button>
-                <button type="submit" class="submit-btn">Enviar Registro</button>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="15">Anterior</button>
+                    <button type="button" id="submit-btn" class="submit-btn">Enviar Registro</button>
+                </div>
             </div>
-            </div>
-            
         </form>
         
 

@@ -260,4 +260,20 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'index_visita_oficina.html';
         });
     }
+
+
+    // Evento de clique para o botão de envio
+    if (submitButton) {
+        submitButton.addEventListener('click', (event) => {
+            event.preventDefault(); // Impede o envio padrão do formulário
+            const currentCard = cards[currentCardIndex];
+            if (validateCard(currentCard)) {
+                // Se a validação do último card passar, envia o formulário
+                form.submit();
+            } else {
+                alert('Por favor, preencha todos os campos obrigatórios no último card.');
+            }
+        });
+    }
+
 });

@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Seus seletores, funções e lógicas de navegação existentes...
-    // Mantenha tudo o que já funciona
     const form = document.getElementById('agendamento-form');
     const cards = document.querySelectorAll('.card');
     const prevButtons = document.querySelectorAll('.prev-btn');
@@ -13,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const latitudeInput = document.getElementById('latitude');
     const longitudeInput = document.getElementById('longitude');
     const homeButton = document.getElementById('home-btn');
+    const submitButton = document.querySelector('.submit-btn'); // Seleciona o botão de envio
 
     let currentCardIndex = 0;
 
@@ -119,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     veiculosEntreguesInput.style.border = '';
                 }
             }
+
             showCard(nextCardId);
         });
     });
@@ -255,20 +255,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-   document.addEventListener('DOMContentLoaded', () => {
-    // ... (rest of your existing code, no changes needed here) ...
-
-    if (form) {
-        form.addEventListener('submit', (event) => {
+    // Evento de clique para o botão de envio
+    if (submitButton) {
+        submitButton.addEventListener('click', (event) => {
+            event.preventDefault(); // Impede o envio padrão do formulário
             const currentCard = cards[currentCardIndex];
-            // Se a validação do último card falhar, impede o envio do formulário.
-            if (!validateCard(currentCard)) {
-                alert('Por favor, preencha todos os campos obrigatórios.');
-                event.preventDefault(); // Impede o envio se houver erros.
+            if (validateCard(currentCard)) {
+                // Se a validação do último card passar, envia o formulário
+                form.submit();
+            } else {
+                alert('Por favor, preencha todos os campos obrigatórios no último card.');
             }
-            // Se a validação for bem-sucedida, o código continua e o formulário é enviado.
-            // O navegador cuida do envio para o Apps Script e do redirecionamento.
         });
     }
-});
 });
