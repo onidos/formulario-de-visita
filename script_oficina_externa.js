@@ -11,17 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const latitudeInput = document.getElementById('latitude');
     const longitudeInput = document.getElementById('longitude');
     const homeButton = document.getElementById('home-btn');
-    const submitButton = document.querySelector('.submit-btn'); // Seleciona o botão de envio
+    const submitButton = document.querySelector('.submit-btn');
 
     let currentCardIndex = 0;
 
     const showCard = (cardId) => {
         const targetCard = document.getElementById(`card-${cardId}`);
         if (!targetCard) {
-            // Se o card de sucesso não existir, mas o form for submetido, redireciona
-            if (cardId === 17) {
-                window.location.href = 'sucesso.html';
-            }
             return;
         }
         cards.forEach(card => card.style.display = 'none');
@@ -257,11 +253,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Evento de clique para o botão de envio
     if (submitButton) {
-        submitButton.addEventListener('click', (event) => {
-            event.preventDefault(); // Impede o envio padrão do formulário
+        submitButton.addEventListener('click', () => {
             const currentCard = cards[currentCardIndex];
             if (validateCard(currentCard)) {
-                // Se a validação do último card passar, envia o formulário
+                // Se a validação do último card passar, submete o formulário
                 form.submit();
             } else {
                 alert('Por favor, preencha todos os campos obrigatórios no último card.');
