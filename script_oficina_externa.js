@@ -251,12 +251,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Evento do botão de envio do formulário
+    if (submitButton) {
+        submitButton.addEventListener('click', (event) => {
+            event.preventDefault();
+
+            const currentCard = document.querySelector('.card:not([style*="display: none"])');
+            if (!validateCard(currentCard)) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            const formData = new FormData(form);
+            const formUrl = form.action;
+
+            fetch(formUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            })
+            .then(() => {
+                window.location.href = 'sucesso.html';
+            })
+            .catch(error => {
+                console.error('Erro ao enviar o formulário:', error);
+                alert('Ocorreu um erro ao enviar o formulário. Por favor, tente novamente.');
+            });
+        });
+    }
+
     // Evento de clique para o botão de envio
     if (submitButton) {
-        submitButton.addEventListener('click', () => {
+        submitButton.addEventListener('click', (event) => {
+            event.preventDefault(); // Impede o envio padrão do formulário
             const currentCard = cards[currentCardIndex];
             if (validateCard(currentCard)) {
-                // Se a validação do último card passar, submete o formulário
+                // Se a validação do último card passar, envia o formulário
                 form.submit();
             } else {
                 alert('Por favor, preencha todos os campos obrigatórios no último card.');
