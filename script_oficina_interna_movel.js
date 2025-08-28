@@ -26,6 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentCardIndex = 0;
 
+    const tipoOficinaSalvo = localStorage.getItem('tipo_oficina');
+    const tipoOficinaHiddenInput = document.getElementById('tipo-oficina-hidden');
+
+    if (tipoOficinaSalvo && tipoOficinaHiddenInput) {
+        tipoOficinaHiddenInput.value = tipoOficinaSalvo;
+        console.log('Tipo de Oficina carregado:', tipoOficinaHiddenInput.value);
+    }
+
     // Função para mostrar um card específico e atualizar os pontos de progresso
     const showCard = (cardId) => {
         const targetCard = document.getElementById(`card-${cardId}`);
@@ -143,6 +151,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     isValid = false;
                 } else if (comentarioInput) {
                     comentarioInput.style.border = '';
+                }
+            }
+            
+            // --- NOVO CÓDIGO: Validação específica para o card 14-alt ---
+            if (currentCardId === '14-alt' && resposta === 'Sim') {
+                const quantidadeInput = currentCard.querySelector('#necessidade-aumento-fornecedores');
+                if (quantidadeInput && !quantidadeInput.value.trim()) {
+                    alert('Por favor, preencha o campo "Número de Fornecedores" para continuar.');
+                    quantidadeInput.style.border = '1px solid red';
+                    isValid = false;
+                } else if (quantidadeInput) {
+                    quantidadeInput.style.border = '';
                 }
             }
             

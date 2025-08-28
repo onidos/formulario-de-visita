@@ -16,6 +16,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentCardIndex = 0;
 
+    const tipoOficinaSalvo = localStorage.getItem('tipo_oficina');
+    // Encontra o input hidden no formulário desta página
+    const tipoOficinaHiddenInput = document.getElementById('tipo-oficina-hidden');
+
+    // Se a informação existir, preenche o input hidden com o valor
+    if (tipoOficinaSalvo && tipoOficinaHiddenInput) {
+        tipoOficinaHiddenInput.value = tipoOficinaSalvo;
+        console.log('Tipo de Oficina carregado:', tipoOficinaHiddenInput.value); // Opcional: para debug
+    }
+
 
 
     const showCard = (cardId) => {
