@@ -28,26 +28,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função para mostrar um card específico e atualizar os pontos de progresso
     const showCard = (cardId) => {
-        let newIndex = 0;
-        cards.forEach((card, i) => {
-            if (card.id === `card-${cardId}`) {
-                card.style.display = 'block';
-                newIndex = i;
-            } else {
-                card.style.display = 'none';
-            }
-        });
-
-        if (progressDots.length > 0) {
-            progressDots.forEach((dot, i) => {
-                if (i === newIndex) {
-                    dot.classList.add('active');
-                } else {
-                    dot.classList.remove('active');
-                }
-            });
+        const targetCard = document.getElementById(`card-${cardId}`);
+        if (!targetCard) {
+            return;
         }
-        currentCardIndex = newIndex;
+        cards.forEach(card => card.style.display = 'none');
+        targetCard.style.display = 'block';
+        currentCardIndex = Array.from(cards).indexOf(targetCard);
+
+        switch (cardId) {
+            case 1:
+                document.getElementById('nome').focus();
+                break;
+            case 2:
+                document.getElementById('loja').focus();
+                break;
+            case 3:
+                document.getElementById('endereco').focus();
+                break;
+            default:
+                const firstInput = targetCard.querySelector('input, select');
+                if (firstInput) {
+                    firstInput.focus();
+                }
+                break;
+        }
     };
 
     // Função para validar campos obrigatórios
@@ -118,42 +123,74 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Eventos dos botões "Sim" e "Não"
-    if (simNaoButtons.length > 0) {
-        simNaoButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const resposta = this.getAttribute('data-value');
-                const proximoCardId = this.getAttribute('data-next');
-                const currentCard = this.closest('.card');
-                const currentCardId = currentCard.id.replace('card-', '');
-                const comentarioInput = currentCard.querySelector('textarea');
-                const hiddenInput = currentCard.querySelector('input[type="hidden"]');
-                let isValid = true;
+    simNaoButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const resposta = this.getAttribute('data-value');
+            const proximoCardId = this.getAttribute('data-next');
+            const currentCard = this.closest('.card');
+            const currentCardId = currentCard.id.replace('card-', '');
+            const comentarioInput = currentCard.querySelector('textarea');
+            const hiddenInput = currentCard.querySelector('input[type="hidden"]');
+            let isValid = true;
 
-                const cardsComComentarioObrigatorioNao = ['4', '5', '6', '7-alt'];
-                if (cardsComComentarioObrigatorioNao.includes(currentCardId) && resposta === 'Nao') {
-                    if (comentarioInput && !comentarioInput.value.trim()) {
-                        alert('Por favor, preencha o campo de comentário para continuar, pois sua resposta foi "Não".');
-                        comentarioInput.style.border = '1px solid red';
-                        isValid = false;
-                    } else if (comentarioInput) {
-                        comentarioInput.style.border = '';
-                    }
-                } else if (cardsComComentarioObrigatorioNao.includes(currentCardId) && resposta === 'Sim') {
-                    if (comentarioInput) {
-                        comentarioInput.value = '';
-                        comentarioInput.style.border = '';
-                    }
+            const cardsComComentarioObrigatorioNao = ['4', '5', '6', '7-alt'];
+
+            // Lógica de validação: comentário é obrigatório APENAS se a resposta for 'Não'
+            if (cardsComComentarioObrigatorioNao.includes(currentCardId) && resposta === 'Nao') {
+                if (comentarioInput && !comentarioInput.value.trim()) {
+                    alert('Por favor, preencha o campo de comentário para continuar, pois sua resposta foi "Não".');
+                    comentarioInput.style.border = '1px solid red';
+                    isValid = false;
+                } else if (comentarioInput) {
+                    comentarioInput.style.border = '';
+                }
+            }
+            
+            // Atualiza o valor do campo hidden com a resposta (Sim ou Nao)
+            if (hiddenInput) {
+                hiddenInput.value = resposta;
+            }
+
+            if (isValid) {
+                // Se o card tem um campo de comentário, salva o valor antes de avançar
+                if (comentarioInput) {
+                    const comentarioHiddenInput = document.createElement('input');
+                    comentarioHiddenInput.type = 'hidden';
+                    comentarioHiddenInput.name = comentarioInput.name;
+                    comentarioHiddenInput.value = comentarioInput.value;
+                    form.appendChild(comentarioHiddenInput);
                 }
                 
-                if (isValid) {
-                    if (hiddenInput) {
-                        hiddenInput.value = resposta;
-                    }
-                    showCard(proximoCardId);
-                }
-            });
+                showCard(proximoCardId);
+            }
         });
-    }
+    });
+
+    document.addEventListener('keydown', (e) => {
+    // Verifica se a tecla pressionada é a tecla Enter (código 13)
+    if (e.key === 'Enter' || e.keyCode === 13) {
+            // Encontra o card visível
+            const visibleCard = document.querySelector('.card[style*="display: block"]');
+            if (visibleCard) {
+                // Encontra o botão 'Próximo' dentro do card visível
+                const nextButton = visibleCard.querySelector('.next-btn');
+                // Encontra o botão 'Sim' para cards de pergunta
+                const simButton = visibleCard.querySelector('.sim-nao-btn[data-value="Sim"]');
+                
+                // Impede o envio do formulário padrão ao pressionar Enter
+                e.preventDefault();
+
+                // Prioriza o botão "Próximo"
+                if (nextButton) {
+                    nextButton.click();
+                } 
+                // Se não houver botão "Próximo", tenta o botão "Sim"
+                else if (simButton) {
+                    simButton.click();
+                }
+            }
+        }
+    });
 
     // Evento do botão de envio do formulário
     if (submitButton) {
