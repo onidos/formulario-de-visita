@@ -13,7 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const homeButton = document.getElementById('home-btn');
     const submitButton = document.querySelector('.submit-btn');
 
+
     let currentCardIndex = 0;
+
+
 
     const showCard = (cardId) => {
         const targetCard = document.getElementById(`card-${cardId}`);
@@ -23,7 +26,26 @@ document.addEventListener('DOMContentLoaded', () => {
         cards.forEach(card => card.style.display = 'none');
         targetCard.style.display = 'block';
         currentCardIndex = Array.from(cards).indexOf(targetCard);
+
+        switch (cardId) {
+            case 1:
+                document.getElementById('nome').focus();
+                break;
+            case 2:
+                document.getElementById('loja').focus();
+                break;
+            case 3:
+                document.getElementById('endereco').focus();
+                break;
+            default:
+                const firstInput = targetCard.querySelector('input, select');
+                if (firstInput) {
+                    firstInput.focus();
+                }
+                break;
+        }
     };
+
 
     const validateCard = (card) => {
         const inputs = card.querySelectorAll('[required]');
@@ -178,6 +200,32 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'index_visita_oficina.html';
         });
     }
+
+    document.addEventListener('keydown', (e) => {
+    // Verifica se a tecla pressionada é a tecla Enter (código 13)
+    if (e.key === 'Enter' || e.keyCode === 13) {
+            // Encontra o card visível
+            const visibleCard = document.querySelector('.card[style*="display: block"]');
+            if (visibleCard) {
+                // Encontra o botão 'Próximo' dentro do card visível
+                const nextButton = visibleCard.querySelector('.next-btn');
+                // Encontra o botão 'Sim' para cards de pergunta
+                const simButton = visibleCard.querySelector('.sim-nao-btn[data-value="Sim"]');
+                
+                // Impede o envio do formulário padrão ao pressionar Enter
+                e.preventDefault();
+
+                // Prioriza o botão "Próximo"
+                if (nextButton) {
+                    nextButton.click();
+                } 
+                // Se não houver botão "Próximo", tenta o botão "Sim"
+                else if (simButton) {
+                    simButton.click();
+                }
+            }
+        }
+    });
 
     if (getLocationButton) {
         getLocationButton.addEventListener('click', () => {
