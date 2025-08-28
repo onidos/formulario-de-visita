@@ -249,8 +249,8 @@
                     <label>11- Existe necessidade de aumento de fornecedores?</label>
                 </div>
                 <div class="navigation-buttons">
-                    <button type="button" class="sim-nao-btn" data-value="Sim" data-next="15">Sim</button>
-                    <button type="button" class="sim-nao-btn" data-value="Nao" data-next="15">Não</button>
+                    <button type="button" class="sim-nao-btn" data-value="Sim" data-next="15-alt">Sim</button>
+                    <button type="button" class="sim-nao-btn" data-value="Nao" data-next="15-alt">Não</button>
                 </div>
                 <div class="input-group">
                     <label for="necessidade-aumento-fornecedores">Número de Fornecedores:</label>
@@ -262,7 +262,7 @@
                 <input type="hidden" id="resposta-sala" name="entry.1359946908">
             </div>
 
-            <div class="card" id="card-15" style="display: none;">
+            <div class="card" id="card-15-alt" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Externa</h3>
                 <div class="input-group">
                     <label>12- Realizar identificação dos 3 veículos a mais tempo no improdutivo, considerando os itens: identificação da etapa do processo de reparação, averiguação física do estado de conservação do veículo, solicitação e acompanhamento do prazo estipulado para entrega do carro.</label>
@@ -273,9 +273,12 @@
                 </div>
                 <div class="navigation-buttons">
                     <button type="button" class="prev-btn" data-card="14-alt">Anterior</button>
-                    <button type="submit" class="submit-btn">Enviar Registro</button>
+                    <button type="button" id="submit-btn" class="submit-btn">Enviar Registro</button>  
                 </div>
             </div>
+
+           
+        </form>
 
         </form>
     </div>
