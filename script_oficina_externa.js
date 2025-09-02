@@ -105,35 +105,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            if (currentCardId === '12') {
+            if (currentCardId === '14') {
                 const veiculosTotalInput = document.getElementById('veiculos-total');
+                const veiculosorcamentoInput = document.getElementById('veiculos-orcamento');
                 const veiculosPendentesInput = document.getElementById('veiculos-pendentes');
                 const veiculosAprovadosInput = document.getElementById('veiculos-aprovados');
                 const veiculosAguardandoInput = document.getElementById('veiculos-aguardando');
 
                 const total = parseInt(veiculosTotalInput.value);
+                const orcamento = parseInt(veiculosorcamentoInput.value);
                 const pendentes = parseInt(veiculosPendentesInput.value);
                 const aprovados = parseInt(veiculosAprovadosInput.value);
                 const aguardando = parseInt(veiculosAguardandoInput.value);
 
-                const soma = pendentes + aprovados + aguardando;
+                const soma = orcamento + pendentes + aprovados + aguardando;
 
                 if (soma !== total) {
                     alert(`A soma dos veículos (${soma}) não corresponde ao total de veículos em manutenção (${total}). Por favor, corrija os valores.`);
                     veiculosTotalInput.style.border = '1px solid red';
+                    veiculosorcamentoInput.style.border = '1px solid red';
                     veiculosPendentesInput.style.border = '1px solid red';
                     veiculosAprovadosInput.style.border = '1px solid red';
                     veiculosAguardandoInput.style.border = '1px solid red';
                     return;
                 } else {
                     veiculosTotalInput.style.border = '';
+                    veiculosorcamentoInput.style.border = '';
                     veiculosPendentesInput.style.border = '';
                     veiculosAprovadosInput.style.border = '';
                     veiculosAguardandoInput.style.border = '';
                 }
             }
 
-            if (currentCardId === '13') {
+            if (currentCardId === '15') {
                 const veiculosTotalInput = document.getElementById('veiculos-total');
                 const veiculosEntreguesInput = document.getElementById('veiculos-entregues');
                 const total = parseInt(veiculosTotalInput.value);
@@ -146,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     veiculosEntreguesInput.style.border = '';
                 }
             }
+
 
             showCard(nextCardId);
         });

@@ -3,7 +3,7 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #0051AA; /* Nova cor de fundo azul */
+    background-color: #0051AA;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -12,11 +12,10 @@ body {
 
 .container {
     width: 100%;
-    max-width: 600px; /* Largura máxima para tablets */
-    background-color: #fff; /* Fundo branco do cartão */
+    max-width: 600px;
+    background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
     padding: 20px;
     box-sizing: border-box;
 }
@@ -26,7 +25,7 @@ body {
     display: block;
     max-width: 150px;
     margin: 0 auto 20px;
-    border-radius: 8px; /* Adicionado para arredondar os cantos da imagem */
+    border-radius: 8px;
 }
 
 /* Estilos dos cartões (seções) */
@@ -90,7 +89,7 @@ button {
 }
 
 .next-btn, #submit-form {
-    background-color: #0051AA; /* Nova cor principal azul */
+    background-color: #0051AA;
     color: #fff;
 }
 
@@ -100,7 +99,7 @@ button {
 }
 
 .next-btn:hover, #submit-form:hover {
-    background-color: #003c80; /* Tom mais escuro para o hover */
+    background-color: #003c80;
 }
 
 .prev-btn:hover {
@@ -125,7 +124,7 @@ button {
 }
 
 .progress-dot.active {
-    background-color: #0051AA; /* Nova cor principal azul */
+    background-color: #0051AA;
 }
 
 /* Estilo para telas menores (smartphones) */
@@ -150,31 +149,11 @@ button {
     margin: 15px;
 }
 
-
 .sim-nao-btn:hover {
     background-color: #b30000;
 }
 
-#card-4 .input-group textarea,
-#card-5 .input-group textarea,
-#card-15 .input-group textarea,
-#card-6 .input-group textarea,
-#card-7 .input-group textarea{
-    width: 100%;
-}
-
-#card-7.card textarea,
-#card-7-alt.card textarea,
-#card-8-alt.card textarea,
-#card-9-alt.card textarea,
-#card-10-alt.card textarea,
-#card-11-alt.card textarea,
-#card-12-alt.card textarea,
-#card-13-alt.card textarea,
-#card-14-alt.card textarea,
-#card-15-alt.card textarea,
-#card-16-alt.card textarea,
-#card-8.card textarea {
+#card-4 .input-group textarea, #card-5 .input-group textarea, #card-15 .input-group textarea, #card-6 .input-group textarea, #card-7 .input-group textarea, #card-7.card textarea, #card-7-alt.card textarea, #card-8-alt.card textarea, #card-9-alt.card textarea, #card-10-alt.card textarea, #card-11-alt.card textarea, #card-12-alt.card textarea, #card-13-alt.card textarea, #card-14-alt.card textarea, #card-15-alt.card textarea, #card-16-alt.card textarea, #card-16.card textarea, #card-8.card textarea {
     width: 100%;
 }
 
@@ -182,7 +161,7 @@ button {
     position: fixed;
     top: 20px;
     left: 20px;
-    z-index: 1000; /* Garante que o botão fique acima de outros elementos */
+    z-index: 1000;
     padding: 10px 15px;
     background-color: #007bff;
     color: white;
@@ -196,4 +175,32 @@ button {
 
 .fixed-home-btn:hover {
     background-color: #0056b3;
+}
+
+#card-7.card textarea,
+#card-7-alt.card textarea,
+#card-8-alt.card textarea,
+#card-9-alt.card textarea,
+#card-10-alt.card textarea,
+#card-11-alt.card textarea,
+#card-12-alt.card textarea,
+#card-13-alt.card textarea,
+#card-14-alt.card textarea,
+#card-15-alt.card textarea,
+#card-16-alt.card textarea,
+#card-16.card textarea,
+#card-9.card textarea,
+#card-10.card textarea,
+#card-11.card textarea,
+#card-8.card textarea {
+    width: 100%;
+}
+
+#card-4 .input-group textarea,
+#card-5 .input-group textarea,
+#card-15 .input-group textarea,
+#card-17 .input-group textarea,
+#card-6 .input-group textarea,
+#card-7 .input-group textarea{
+    width: 100%;
 }
