@@ -76,7 +76,7 @@
                         <option value="" disabled selected>Selecione um motivo</option>
                         <option value="Prospecção">Prospecção</option>
                         <option value="Auditoria de Rotina">Auditoria de Rotina</option>
-                        <option value="RECLAMAÇÃO">RECLAMAÇÃO</option>
+                        <option value="Reclamação">Reclamação</option>
                     </select>
                 </div>
 
@@ -89,7 +89,7 @@
             
 
             <div class="card" id="card-4" style="display: none;">
-                <h2>Data, Hora e Local</h2>                
+                <h2>Data, Hora e Local</h2>
                 <div class="input-group">
                     <label for="data-visita">Data da Visita</label>
                     <input type="date" id="data-visita" name="entry.324297223" required>
@@ -102,8 +102,7 @@
                     <label for="endereco">Sua Localização</label>
                     <input type="text" id="endereco" name="entry.222603552" placeholder="Digite seu endereço" required autofocus>
                     <button type="button" id="get-location">Usar Minha Localização</button>
-                    <input type="hidden" id="latitude" name="latitude">
-                    <input type="hidden" id="longitude" name="longitude">
+                    <input type="hidden" id="cidade-input" name="entry.498456657">
                 </div>
                 <div class="navigation-buttons">
                     <button type="button" class="prev-btn" data-card="3">Anterior</button>
@@ -318,7 +317,7 @@
                 <div class="navigation-buttons">
                     <button type="button" class="prev-btn" data-card="15">Anterior</button>
                 </div>
-                <input type="hidden" id="resposta-sala" name="entry.1359946908">
+                <input type="hidden" id="resposta-placas" name="entry.1359946908">
             </div>
 
             
