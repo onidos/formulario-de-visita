@@ -168,7 +168,7 @@
             <div class="card" id="card-8-alt" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Interna/Móvel</h3>
                 <div class="input-group">
-                    <label>4- Os processos estão dentro do padrão da empresa (materiais bem guardados e organizados, local limpo e sem manchas, funcionários uniformizados e utilização de epi)?</label>
+                    <label>Os processos estão dentro do padrão da empresa (materiais bem guardados e organizados, local limpo e sem manchas, funcionários uniformizados e utilização de epi)?</label>
                     <div class="navigation-buttons">
                         <button type="button" class="sim-nao-btn" data-value="Sim" data-next="9-alt">Sim</button>
                         <button type="button" class="sim-nao-btn" data-value="Nao" data-next="9-alt">Não</button>
@@ -187,26 +187,11 @@
             <div class="card" id="card-9-alt" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Interna/Móvel</h3>
                 <div class="input-group">
-                    <label>Quantos veículos temos em manutenção dentro da oficina no momento?</label>                    
+                    <label>Quantos veículos temos dentro da oficina no momento?</label>                    
                 </div>
                 <div class="input-group">
                     <label for="veiculos-manutencao">Número de Veículos:</label>
                     <input type="number" id="veiculos-manutencao" name="entry.243474358" placeholder="Digite a quantidade" required>
-                </div>
-                <div class="navigation-buttons">
-                    <button type="button" class="prev-btn" data-card="10-alt">Anterior</button>
-                    <button type="button" class="next-btn" data-card="11-alt">Próximo</button>
-                </div>
-            </div>
-
-            <div class="card" id="card-11-alt" style="display: none;">
-                <h3>Área 2 | Informações Sobre Oficina Interna/Móvel</h3>
-                <div class="input-group">
-                    <label>Quantos veículos em FS?</label>
-                </div>
-                <div class="input-group">
-                    <label for="veiculos-fs">Número de Veículos:</label>
-                    <input type="number" id="veiculos-fs" name="entry.1542147720" placeholder="Digite a quantidade" required>
                 </div>
                 <div class="navigation-buttons">
                     <button type="button" class="prev-btn" data-card="8-alt">Anterior</button>
@@ -217,11 +202,12 @@
             <div class="card" id="card-10-alt" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Interna/Móvel</h3>
                 <div class="input-group">
-                    <label>7- Quantos veículos pendentes de aprovação?</label>
+                    <label>Quantos veículos em FS?</label>
+                    <label>(Dentro da oficina, mas aguardando checking da oficina)</label>
                 </div>
                 <div class="input-group">
-                    <label for="veiculos-aprovacao">Número de Veículos:</label>
-                    <input type="number" id="veiculos-aprovacao" name="entry.1147423564" placeholder="Digite a quantidade" required>
+                    <label for="veiculos-fs">Número de Veículos:</label>
+                    <input type="number" id="veiculos-fs" name="entry.1542147720" placeholder="Digite a quantidade" required>
                 </div>
                 <div class="navigation-buttons">
                     <button type="button" class="prev-btn" data-card="9-alt">Anterior</button>
@@ -232,11 +218,12 @@
             <div class="card" id="card-11-alt" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Interna/Móvel</h3>
                 <div class="input-group">
-                    <label>8- Quantos veículos em serviço aprovados?</label>
+                    <label>Quantos veículos pendentes de aprovação?</label>
+                    <label>(Orçamento já enviado)</label>
                 </div>
                 <div class="input-group">
-                    <label for="veiculos-servico">Número de Veículos:</label>
-                    <input type="number" id="veiculos-servico" name="entry.1953860915" placeholder="Digite a quantidade" required>
+                    <label for="veiculos-aprovacao">Número de Veículos:</label>
+                    <input type="number" id="veiculos-aprovacao" name="entry.1147423564" placeholder="Digite a quantidade" required>
                 </div>
                 <div class="navigation-buttons">
                     <button type="button" class="prev-btn" data-card="10-alt">Anterior</button>
@@ -247,11 +234,12 @@
             <div class="card" id="card-12-alt" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Interna/Móvel</h3>
                 <div class="input-group">
-                    <label>9- Quantos veículos aguardando peças?</label>
-                </div>  
+                    <label>Quantos veículos em serviço?</label>
+                    <label>(Orçamento aprovado)</label>
+                </div>
                 <div class="input-group">
-                    <label for="veiculos-pecas">Número de Veículos:</label>
-                    <input type="number" id="veiculos-pecas" name="entry.1055686739" placeholder="Digite a quantidade" required>
+                    <label for="veiculos-servico">Número de Veículos:</label>
+                    <input type="number" id="veiculos-servico" name="entry.1953860915" placeholder="Digite a quantidade" required>
                 </div>
                 <div class="navigation-buttons">
                     <button type="button" class="prev-btn" data-card="11-alt">Anterior</button>
@@ -262,49 +250,79 @@
             <div class="card" id="card-13-alt" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Interna/Móvel</h3>
                 <div class="input-group">
-                    <label>10- Deste volume quantos seriam entregues no dia atual?</label>
+                    <label>Quantos veículos aguardando peças?</label>
+                </div>  
+                <div class="input-group">
+                    <label for="veiculos-pecas">Número de Veículos:</label>
+                    <input type="number" id="veiculos-pecas" name="entry.1055686739" placeholder="Digite a quantidade" required>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="12-alt">Anterior</button>
+                    <button type="button" class="next-btn" data-card="14-alt">Próximo</button>
+                </div>
+            </div>
+
+            <div class="card" id="card-14-alt" style="display: none;">
+                <h3>Área 2 | Informações Sobre Oficina Interna/Móvel</h3>
+                <div class="input-group">
+                    <label>Quantos em orçamento?</label>
+                </div>  
+                <div class="input-group">
+                    <label for="veiculos-pecas">Número de Veículos:</label>
+                    <input type="number" id="veiculos-pecas" name="entry.1056386731" placeholder="Digite a quantidade" required>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="13-alt">Anterior</button>
+                    <button type="button" class="next-btn" data-card="15-alt">Próximo</button>
+                </div>
+            </div>
+
+            <div class="card" id="card-15-alt" style="display: none;">
+                <h3>Área 2 | Informações Sobre Oficina Interna/Móvel</h3>
+                <div class="input-group">
+                    <label>Deste volume quantos seriam entregues no dia atual?</label>
                 </div>
                 <div class="input-group">
                     <label for="veiculos-entregues">Número de Veículos:</label>
                     <input type="number" id="veiculos-entregues" name="entry.1528463567" placeholder="Digite a quantidade" required>
                 </div>
                 <div class="navigation-buttons">
-                    <button type="button" class="prev-btn" data-card="12-alt">Anterior</button>
-                    <button type="button" class="next-btn" data-card="14-alt">Próximo</button>                    
+                    <button type="button" class="prev-btn" data-card="14-alt">Anterior</button>
+                    <button type="button" class="next-btn" data-card="16-alt">Próximo</button>                    
                 </div>
             </div>
 
 
-            <div class="card" id="card-14-alt" style="display: none;">
+            <div class="card" id="card-16-alt" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Externa</h3>
                 <div class="input-group">
-                    <label>11- Existe necessidade de aumento de fornecedores?</label>
+                    <label>Existe necessidade de aumento de fornecedores?</label>
                 </div>
                 <div class="navigation-buttons">
-                    <button type="button" class="sim-nao-btn" data-value="Sim" data-next="15-alt">Sim</button>
-                    <button type="button" class="sim-nao-btn" data-value="Nao" data-next="15-alt">Não</button>
+                    <button type="button" class="sim-nao-btn" data-value="Sim" data-next="17-alt">Sim</button>
+                    <button type="button" class="sim-nao-btn" data-value="Nao" data-next="17-alt">Não</button>
                 </div>
                 <div class="input-group">
                     <label for="necessidade-aumento-fornecedores">Número de Fornecedores:</label>
                     <input type="number" id="necessidade-aumento-fornecedores" name="entry.1986006638" placeholder="Digite a quantidade">
                 </div>
                 <div class="navigation-buttons">
-                    <button type="button" class="prev-btn" data-card="13-alt">Anterior</button>
+                    <button type="button" class="prev-btn" data-card="15-alt">Anterior</button>
                 </div>
                 <input type="hidden" id="resposta-sala" name="entry.1359946908">
             </div>
 
-            <div class="card" id="card-15-alt" style="display: none;">
+            <div class="card" id="card-17-alt" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Externa</h3>
                 <div class="input-group">
-                    <label>12- Realizar identificação dos 3 veículos a mais tempo no improdutivo, considerando os itens: identificação da etapa do processo de reparação, averiguação física do estado de conservação do veículo, solicitação e acompanhamento do prazo estipulado para entrega do carro.</label>
+                    <label>Realizar identificação dos 3 veículos a mais tempo no improdutivo, considerando os itens: identificação da etapa do processo de reparação, averiguação física do estado de conservação do veículo, solicitação e acompanhamento do prazo estipulado para entrega do carro.</label>
                 </div>
                 <div class="input-group">
                     <label for="comentario-9">Comentário:</label>
                     <textarea id="comentario-9" name="entry.177822893" rows="5" placeholder="Descreva os 3 veículos mais antigos e as ações..." required></textarea>
                 </div>
                 <div class="navigation-buttons">
-                    <button type="button" class="prev-btn" data-card="14-alt">Anterior</button>
+                    <button type="button" class="prev-btn" data-card="16-alt">Anterior</button>
                     <button type="button" id="submit-btn" class="submit-btn">Enviar Registro</button>  
                 </div>
             </div>

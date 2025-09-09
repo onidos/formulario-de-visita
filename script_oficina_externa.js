@@ -16,14 +16,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentCardIndex = 0;
 
-    const tipoOficinaSalvo = localStorage.getItem('tipo_oficina');
+   
     // Encontra o input hidden no formulário desta página
+   const tipoOficinaSalvo = localStorage.getItem('tipo_oficina');
     const tipoOficinaHiddenInput = document.getElementById('tipo-oficina-hidden');
 
-    // Se a informação existir, preenche o input hidden com o valor
     if (tipoOficinaSalvo && tipoOficinaHiddenInput) {
         tipoOficinaHiddenInput.value = tipoOficinaSalvo;
-        console.log('Tipo de Oficina carregado:', tipoOficinaHiddenInput.value); // Opcional: para debug
+        console.log('Tipo de Oficina carregado:', tipoOficinaHiddenInput.value);
+    }
+
+    // Recupera a cidade do localStorage
+    const cidadeSalva = localStorage.getItem('cidade');
+    const cidadeInput = document.getElementById('cidade-input');
+    
+    if (cidadeSalva && cidadeInput) {
+        cidadeInput.value = cidadeSalva;
+        console.log('Cidade carregada:', cidadeInput.value);
     }
 
 
@@ -242,6 +251,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+
+
+// ... seu código existente ...
+
     if (getLocationButton) {
         getLocationButton.addEventListener('click', () => {
             if (navigator.geolocation) {
@@ -257,6 +270,23 @@ document.addEventListener('DOMContentLoaded', () => {
                             .then(data => {
                                 if (data.display_name) {
                                     enderecoInput.value = data.display_name;
+
+                                    // --- NOVO CÓDIGO AQUI ---
+                                    let cidade = '';
+                                    if (data.address.city) {
+                                        cidade = data.address.city;
+                                    } else if (data.address.town) {
+                                        cidade = data.address.town;
+                                    } else if (data.address.village) {
+                                        cidade = data.address.village;
+                                    }
+                                    
+                                    // Preenche o campo oculto com o valor da cidade
+                                    if (cidadeInput) {
+                                        cidadeInput.value = cidade;
+                                    }
+                                    // --- FIM DO NOVO CÓDIGO ---
+
                                     alert('Localização obtida com sucesso!');
                                 } else {
                                     enderecoInput.value = 'Endereço não encontrado';
