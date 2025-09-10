@@ -205,3 +205,25 @@ button {
 #card-7 .input-group textarea{
     width: 100%;
 }
+
+.alerta-login {
+    background-color: #ffcccc; /* Fundo vermelho claro */
+    border: 2px solid #ff0000; /* Borda vermelha */
+    color: #cc0000; /* Texto em vermelho escuro */
+    padding: 15px; /* Espaçamento interno */
+    margin-bottom: 20px; /* Margem abaixo para separar do próximo elemento */
+    text-align: center; /* Centraliza o texto */
+    font-size: 0.6em; /* Aumenta o tamanho da fonte */
+    font-weight: bold; /* Deixa o texto em negrito */
+    border-radius: 8px; /* Cantos arredondados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para dar profundidade */
+}
+
+/* Opcional: Estilo para o h1 dentro do alerta */
+.alerta-login h1 {
+    margin: 0; /* Remove margem padrão do h1 */
+}
+.alerta-login h5 {
+    margin: 0; /* Remove margem padrão do h5 */
+    font-size: 3.5em; /* Aumenta o tamanho da fonte */
+}
