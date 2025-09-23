@@ -114,20 +114,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            if (currentCardId === '14') {
+            if (currentCardId === '15') {
                 const veiculosTotalInput = document.getElementById('veiculos-total');
                 const veiculosorcamentoInput = document.getElementById('veiculos-orcamento');
                 const veiculosPendentesInput = document.getElementById('veiculos-pendentes');
                 const veiculosAprovadosInput = document.getElementById('veiculos-aprovados');
                 const veiculosAguardandoInput = document.getElementById('veiculos-aguardando');
+                const veiculosFSInput = document.getElementById('veiculos-FS');
 
                 const total = parseInt(veiculosTotalInput.value);
                 const orcamento = parseInt(veiculosorcamentoInput.value);
                 const pendentes = parseInt(veiculosPendentesInput.value);
                 const aprovados = parseInt(veiculosAprovadosInput.value);
                 const aguardando = parseInt(veiculosAguardandoInput.value);
+                const FS = parseInt(veiculosFSInput.value);
 
-                const soma = orcamento + pendentes + aprovados + aguardando;
+                const soma = orcamento + pendentes + aprovados + aguardando + FS;
 
                 if (soma !== total) {
                     alert(`A soma dos veículos (${soma}) não corresponde ao total de veículos em manutenção (${total}). Por favor, corrija os valores.`);
@@ -136,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     veiculosPendentesInput.style.border = '1px solid red';
                     veiculosAprovadosInput.style.border = '1px solid red';
                     veiculosAguardandoInput.style.border = '1px solid red';
+                    veiculosFSInput.style.border = '1px solid red';
                     return;
                 } else {
                     veiculosTotalInput.style.border = '';
@@ -143,10 +146,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     veiculosPendentesInput.style.border = '';
                     veiculosAprovadosInput.style.border = '';
                     veiculosAguardandoInput.style.border = '';
+                    veiculosFSInput.style.border = '';
                 }
             }
 
-            if (currentCardId === '15') {
+            if (currentCardId === '16') {
                 const veiculosTotalInput = document.getElementById('veiculos-total');
                 const veiculosEntreguesInput = document.getElementById('veiculos-entregues');
                 const total = parseInt(veiculosTotalInput.value);
