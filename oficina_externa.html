@@ -286,14 +286,16 @@
                 </div>
             </div>
 
+
             <div class="card" id="card-15" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Externa</h3>
                 <div class="input-group">
-                    <label>Deste volume quantos seriam entregues no dia atual?</label>
+                    <label>Quantos veículos em FS?</label>
+                    <label>(Dentro da oficina, mas aguardando checking da oficina)</label>
                 </div>
                 <div class="input-group">
-                    <label for="veiculos-entregues">Número de Veículos:</label>
-                    <input type="number" id="veiculos-entregues" name="entry.185208252" placeholder="Digite a quantidade" required>
+                    <label for="veiculos-aguardando">Número de Veículos:</label>
+                    <input type="number" id="veiculos-aguardando" name="entry.940201145" placeholder="Digite a quantidade" required>
                 </div>
                 <div class="navigation-buttons">
                     <button type="button" class="prev-btn" data-card="14">Anterior</button>
@@ -304,25 +306,40 @@
             <div class="card" id="card-16" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Externa</h3>
                 <div class="input-group">
+                    <label>Deste volume quantos seriam entregues no dia atual?</label>
+                </div>
+                <div class="input-group">
+                    <label for="veiculos-entregues">Número de Veículos:</label>
+                    <input type="number" id="veiculos-entregues" name="entry.185208252" placeholder="Digite a quantidade" required>
+                </div>
+                <div class="navigation-buttons">
+                    <button type="button" class="prev-btn" data-card="15">Anterior</button>
+                    <button type="button" class="next-btn" data-card="17">Próximo</button>
+                </div>
+            </div>
+
+            <div class="card" id="card-17" style="display: none;">
+                <h3>Área 2 | Informações Sobre Oficina Externa</h3>
+                <div class="input-group">
                     <label>Existe necessidade de aumento de fornecedores?</label>
                 </div>
                 <div class="navigation-buttons">
-                    <button type="button" class="sim-nao-btn" data-value="Sim" data-next="17">Sim</button>
-                    <button type="button" class="sim-nao-btn" data-value="Nao" data-next="17">Não</button>
+                    <button type="button" class="sim-nao-btn" data-value="Sim" data-next="18">Sim</button>
+                    <button type="button" class="sim-nao-btn" data-value="Nao" data-next="18">Não</button>
                 </div>
                 <div class="input-group">
                     <label for="necessidade-aumento-fornecedores">Número de Fornecedores:</label>
                     <input type="number" id="necessidade-aumento-fornecedores" name="entry.1986006638" placeholder="Digite a quantidade">
                 </div>
                 <div class="navigation-buttons">
-                    <button type="button" class="prev-btn" data-card="15">Anterior</button>
+                    <button type="button" class="prev-btn" data-card="16">Anterior</button>
                 </div>
                 <input type="hidden" id="resposta-placas" name="entry.1359946908">
             </div>
 
             
 
-            <div class="card" id="card-17" style="display: none;">
+            <div class="card" id="card-18" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Externa</h3>
                 <div class="input-group">
                     <label>Realizar identificação dos 3 veículos a mais tempo no improdutivo, considerando os itens: identificação da etapa do processo de reparação, averiguação física do estado de conservação do veículo, solicitação e acompanhamento do prazo estipulado para entrega do carro.</label>
@@ -332,7 +349,7 @@
                     <textarea id="comentario-9" name="entry.177822893" rows="5" placeholder="Descreva os 3 veículos mais antigos e as ações..." required></textarea>
                 </div>
                 <div class="navigation-buttons">
-                    <button type="button" class="prev-btn" data-card="16">Anterior</button>
+                    <button type="button" class="prev-btn" data-card="17">Anterior</button>
                     <button type="button" id="submit-btn" class="submit-btn">Enviar Registro</button>
                 </div>
             </div>
