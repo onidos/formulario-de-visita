@@ -334,19 +334,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayAutocompleteSuggestions(predictions) {
-        autocompleteList.innerHTML = '';
-        predictions.forEach(prediction => {
-            const li = document.createElement('li');
-            li.textContent = prediction.display_name;
-            li.addEventListener('click', () => {
-                enderecoInput.value = prediction.display_name;
-                latitudeInput.value = prediction.lat;
-                longitudeInput.value = prediction.lon;
-                autocompleteList.innerHTML = '';
-            });
-            autocompleteList.appendChild(li);
+    autocompleteList.innerHTML = '';
+    predictions.forEach(prediction => {
+        const li = document.createElement('li');
+        li.textContent = prediction.display_name;
+        li.addEventListener('click', () => {
+            enderecoInput.value = prediction.display_name;
+            latitudeInput.value = prediction.lat;
+            longitudeInput.value = prediction.lon;
+            autocompleteList.innerHTML = '';
+
+            // --- NOVO CÓDIGO AQUI ---
+            let cidade = '';
+            if (prediction.address.city) {
+                cidade = prediction.address.city;
+            } else if (prediction.address.town) {
+                cidade = prediction.address.town;
+            } else if (prediction.address.village) {
+                cidade = prediction.address.village;
+            }
+            
+            // Preenche o campo oculto da cidade
+            if (cidadeInput) {
+                cidadeInput.value = cidade;
+            }
+            // --- FIM DO NOVO CÓDIGO ---
         });
-    }
+        autocompleteList.appendChild(li);
+    });
+}
 
     // Evento do botão de envio do formulário
     if (submitButton) {
