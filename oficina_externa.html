@@ -352,15 +352,87 @@
 
             
 
-            <div class="card" id="card-18" style="display: none;">
+             <div class="card" id="card-18" style="display: none;">
                 <h3>Área 2 | Informações Sobre Oficina Externa</h3>
-                <div class="input-group">
-                    <label>Realizar identificação dos 3 veículos a mais tempo no improdutivo, considerando os itens: identificação da etapa do processo de reparação, averiguação física do estado de conservação do veículo, solicitação e acompanhamento do prazo estipulado para entrega do carro.</label>
+                <p>Preencha os dados dos 3 veículos há mais tempo no improdutivo:</p>
+
+                <!-- Cabeçalho dos campos -->
+                <div class="vehicle-row header-row">
+                    <label>Placa</label>
+                    <label>Serviço</label>
+                    <label>Dt. Prev. Entrega</label>
+                    <label>Status</label>
                 </div>
-                <div class="input-group">
-                    <label for="comentario-9">Comentário:</label>
-                    <textarea id="comentario-9" name="entry.177822893" rows="5" placeholder="Descreva os 3 veículos mais antigos e as ações..." required></textarea>
+
+                <!-- Veículo 1 -->
+                <div class="vehicle-row">
+                    <input type="text" name="placa1" placeholder="Placa" required>
+
+                    <select name="servico1[]" multiple required>
+                        <option value="Preventiva">Preventiva</option>
+                        <option value="Corretiva">Corretiva</option>
+                        <option value="Sinistro">Sinistro</option>
+                    </select>
+
+                    <input type="date" name="data1" required>
+
+                    <select name="status1" required>
+                        <option value="" disabled selected>Status</option>
+                        <option value="Fora de Serviço">Fora de Serviço</option>
+                        <option value="Pend. Orçamento">Pend. Orçamento</option>
+                        <option value="Pend. Aprovação">Pend. Aprovação</option>
+                        <option value="Erro Material">Erro Material</option>
+                        <option value="Pend. Peça">Pend. Peça</option>
+                        <option value="Em Serviço">Em Serviço</option>
+                    </select>
                 </div>
+
+                <!-- Veículo 2 -->
+                <div class="vehicle-row">
+                    <input type="text" name="placa2" placeholder="Placa" required>
+
+                    <select name="servico2[]" multiple required>
+                        <option value="Preventiva">Preventiva</option>
+                        <option value="Corretiva">Corretiva</option>
+                        <option value="Sinistro">Sinistro</option>
+                    </select>
+
+                    <input type="date" name="data2" required>
+
+                    <select name="status2" required>
+                        <option value="" disabled selected>Status</option>
+                        <option value="Fora de Serviço">Fora de Serviço</option>
+                        <option value="Pend. Orçamento">Pend. Orçamento</option>
+                        <option value="Pend. Aprovação">Pend. Aprovação</option>
+                        <option value="Erro Material">Erro Material</option>
+                        <option value="Pend. Peça">Pend. Peça</option>
+                        <option value="Em Serviço">Em Serviço</option>
+                    </select>
+                </div>
+
+                <!-- Veículo 3 -->
+                <div class="vehicle-row">
+                    <input type="text" name="placa3" placeholder="Placa" required>
+
+                    <select name="servico3[]" multiple required>
+                        <option value="Preventiva">Preventiva</option>
+                        <option value="Corretiva">Corretiva</option>
+                        <option value="Sinistro">Sinistro</option>
+                    </select>
+
+                    <input type="date" name="data3" required>
+
+                    <select name="status3" required>
+                        <option value="" disabled selected>Status</option>
+                        <option value="Fora de Serviço">Fora de Serviço</option>
+                        <option value="Pend. Orçamento">Pend. Orçamento</option>
+                        <option value="Pend. Aprovação">Pend. Aprovação</option>
+                        <option value="Erro Material">Erro Material</option>
+                        <option value="Pend. Peça">Pend. Peça</option>
+                        <option value="Em Serviço">Em Serviço</option>
+                    </select>
+                </div>
+
                 <div class="navigation-buttons">
                     <button type="button" class="prev-btn" data-card="17">Anterior</button>
                     <button type="button" id="submit-btn" class="submit-btn">Enviar Registro</button>
@@ -378,6 +450,5 @@
 </body>
 
 </html>
-
 
 
