@@ -368,8 +368,7 @@
                 <div class="vehicle-row">
                     <input type="text" name="placa1" placeholder="Placa" required>
 
-                    <select name="servico1" required>
-                        <option value="" disabled selected>Serviço</option>
+                    <select name="servico1[]" multiple required>
                         <option value="Preventiva">Preventiva</option>
                         <option value="Corretiva">Corretiva</option>
                         <option value="Sinistro">Sinistro</option>
@@ -392,8 +391,7 @@
                 <div class="vehicle-row">
                     <input type="text" name="placa2" placeholder="Placa" required>
 
-                    <select name="servico3" required>
-                        <option value="" disabled selected>Serviço</option>
+                    <select name="servico2[]" multiple required>
                         <option value="Preventiva">Preventiva</option>
                         <option value="Corretiva">Corretiva</option>
                         <option value="Sinistro">Sinistro</option>
@@ -414,11 +412,9 @@
 
                 <!-- Veículo 3 -->
                 <div class="vehicle-row">
-                    <input type="text" name="placa3" placeholder="Placa" required>                   
-                    
+                    <input type="text" name="placa3" placeholder="Placa" required>
 
-                    <select name="servico3" required>
-                        <option value="" disabled selected>Serviço</option>
+                    <select name="servico3[]" multiple required>
                         <option value="Preventiva">Preventiva</option>
                         <option value="Corretiva">Corretiva</option>
                         <option value="Sinistro">Sinistro</option>
@@ -454,5 +450,3 @@
 </body>
 
 </html>
-
-
