@@ -1,62 +1,196 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sucesso!</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f2f5;
-        }
-        .success-card {
-            background-color: #fff;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-        }
-        .success-card h1 {
-            color: #4CAF50;
-        }
-        .success-card p {
-            font-size: 1.1em;
-            color: #555;
-            margin-bottom: 20px;
-        }
-        .success-card button {
-            background-color: #004d99;
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s;
-        }
-        .success-card button:hover {
-            background-color: #003366;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro Enviado</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .status-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .status-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid;
+      font-size: .95rem;
+      font-weight: 500;
+    }
+
+    .status-card.ok {
+      background: #f0faf4;
+      border-color: #a3d9b1;
+      color: #1a5c30;
+    }
+
+    .status-card.erro {
+      background: #fff4f4;
+      border-color: #f5a8a8;
+      color: #7a1f1f;
+    }
+
+    .status-card.desconhecido {
+      background: #fffbf0;
+      border-color: #f0d080;
+      color: #7a5a00;
+    }
+
+    .status-card .status-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .status-card .status-text strong {
+      display: block;
+      font-size: .85rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 2px;
+      opacity: .7;
+    }
+
+    .status-card .status-text span {
+      font-size: 1rem;
+    }
+
+    .status-card.erro .retry-hint {
+      display: block;
+      font-size: .8rem;
+      margin-top: 4px;
+      opacity: .75;
+    }
+
+    .success-title {
+      font-family: var(--font-head);
+      font-size: 1.4rem;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .success-sub {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: .9rem;
+      margin-bottom: 0;
+    }
+
+    .loading-indicator {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: .9rem;
+      padding: 24px 0;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .4; }
+    }
+  </style>
 </head>
 <body>
-    <div class="success-card">
-        <h1>Formulário Enviado com Sucesso!</h1>
-        <p>Sua visita foi registrada.</p>
-        <button id="novo-formulario-btn">Inserir Novo Formulário</button>
+  <div class="container">
+    <img src="imagens/logo.png" alt="Logo da Unidas" class="logo">
+
+    <div class="card" id="resultado-card">
+      <div class="loading-indicator" id="loading">Verificando resultado…</div>
     </div>
 
-    <script>
-        document.getElementById('novo-formulario-btn').addEventListener('click', () => {
-            window.location.href = 'index_visita_oficina.html'; // Altere para o nome do seu arquivo HTML principal
-        });
-    </script>
+    <div class="navigation-buttons" style="justify-content:center; margin-top: 16px;">
+      <button type="button" class="next-btn" id="novo-btn" style="max-width:220px; display:none;">
+        Nova Visita
+      </button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const card    = document.getElementById('resultado-card');
+      const loading = document.getElementById('loading');
+      const novoBtn = document.getElementById('novo-btn');
+
+      // Lê o resultado salvo pelo form-utils.js
+      let resultado = { planilha: 'desconhecido', email: 'desconhecido' };
+      try {
+        const raw = localStorage.getItem('submit_result');
+        if (raw) resultado = JSON.parse(raw);
+        localStorage.removeItem('submit_result');
+      } catch (_) {}
+
+      const { planilha, email, erro } = resultado;
+
+      // ── Determina o ícone/título geral ──────────────────────
+      const tudoOk      = planilha === 'ok' && email === 'ok';
+      const planilhaOk  = planilha === 'ok';
+
+      const tituloIcon  = tudoOk ? '✅' : planilhaOk ? '⚠️' : '❌';
+      const tituloTexto = tudoOk
+        ? 'Registro enviado com sucesso!'
+        : planilhaOk
+          ? 'Registro salvo, mas com aviso'
+          : 'Algo deu errado';
+
+      const subtexto = tudoOk
+        ? 'Planilha atualizada e e-mail enviado para a equipe.'
+        : planilhaOk
+          ? 'O registro foi salvo na planilha, mas houve um problema com o e-mail.'
+          : 'Não foi possível confirmar o salvamento do registro.';
+
+      // ── Card de planilha ────────────────────────────────────
+      const infoPlanilha = {
+        ok:          { cls: 'ok',          icon: '📊', msg: 'Registro salvo na planilha' },
+        erro:        { cls: 'erro',        icon: '📊', msg: 'Falha ao salvar na planilha', hint: 'Verifique as permissões do Google Apps Script.' },
+        desconhecido:{ cls: 'desconhecido',icon: '📊', msg: 'Não foi possível confirmar o salvamento', hint: 'O registro pode ter sido salvo normalmente.' },
+      };
+
+      // ── Card de e-mail ──────────────────────────────────────
+      const infoEmail = {
+        ok:          { cls: 'ok',          icon: '📧', msg: 'E-mail enviado para a equipe' },
+        erro:        { cls: 'erro',        icon: '📧', msg: 'Falha ao enviar o e-mail', hint: 'Verifique as permissões de MailApp no Apps Script.' },
+        desconhecido:{ cls: 'desconhecido',icon: '📧', msg: 'Não foi possível confirmar o envio do e-mail', hint: 'O e-mail pode ter sido enviado normalmente.' },
+      };
+
+      const ip = infoPlanilha[planilha] || infoPlanilha.desconhecido;
+      const ie = infoEmail[email]       || infoEmail.desconhecido;
+
+      function renderCard(info) {
+        return `
+          <div class="status-card ${info.cls}">
+            <span class="status-icon">${info.icon}</span>
+            <div class="status-text">
+              <span>${info.msg}</span>
+              ${info.hint ? `<span class="retry-hint">${info.hint}</span>` : ''}
+            </div>
+          </div>`;
+      }
+
+      // ── Monta o HTML ────────────────────────────────────────
+      loading.remove();
+      card.innerHTML = `
+        <div style="text-align:center; margin-bottom:8px; font-size:2.2rem;">${tituloIcon}</div>
+        <h2 class="success-title">${tituloTexto}</h2>
+        <p class="success-sub">${subtexto}</p>
+        <div class="status-cards">
+          ${renderCard(ip)}
+          ${renderCard(ie)}
+        </div>
+        ${erro ? `<p style="font-size:.78rem;color:var(--text-muted);text-align:center;margin-top:4px;">Detalhe técnico: ${erro}</p>` : ''}
+      `;
+
+      novoBtn.style.display = 'block';
+      novoBtn.addEventListener('click', () => {
+        localStorage.removeItem('tipo_oficina');
+        window.location.href = 'index_visita_oficina.html';
+      });
+    });
+  </script>
 </body>
 </html>

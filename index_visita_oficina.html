@@ -1,43 +1,54 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendamento de Visitas</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Visita — Oficina</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="container">
+    <img src="imagens/logo.png" alt="Logo da Unidas" class="logo">
 
-    <div class="container">
-        <img src="imagens/logo.png" alt="Logo da Unidas" class="logo">
-
-        <div class="alerta-login">
-            <h5>⚠️ATENÇÃO⚠️</h5>
-            <h1>É necessário estar logado com uma conta do Google e utilizar o navegador Google Chrome.</h1>
-        </div>
-        
-        <div class="card" id="card-0">
-            <h2>Registro de Visita Oficina</h2>
-            <p>Por favor, clique em "Iniciar" para registrar uma vista a uma Oficina.</p>  
-
-            <div class="input-group">
-                <label for="tipo-oficina">Tipo de Oficina</label>
-                <select id="tipo-oficina" name="tipo_oficina" required>
-                    <option value="" disabled selected>Selecione um tipo de oficina</option>
-                    <option value="Interna">Interna</option>
-                    <option value="Externa">Externa</option>
-                    <option value="Movel">Móvel</option>
-                </select>
-
-                <div class="input-group">
-                    <div class="navigation-buttons">
-                        <button type="button" class="start-btn">Iniciar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="alerta-login">
+      <h5>⚠️ ATENÇÃO ⚠️</h5>
+      <h1>É necessário estar logado com uma conta do Google e utilizar o navegador Google Chrome.</h1>
     </div>
 
-    <script src="script_index_visita.js"></script>
+    <div class="card" id="card-0">
+      <h2>Registro de Visita Oficina</h2>
+      <p>Selecione o tipo de oficina e clique em <strong>Iniciar</strong> para registrar sua visita.</p>
+
+      <div class="input-group">
+        <label for="tipo-oficina">Tipo de Oficina</label>
+        <select id="tipo-oficina" name="tipo_oficina" required>
+          <option value="" disabled selected>Selecione um tipo de oficina</option>
+          <option value="Interna">Interna</option>
+          <option value="Externa">Externa</option>
+          <option value="Movel">Móvel</option>
+        </select>
+      </div>
+
+      <div class="navigation-buttons">
+        <button type="button" class="start-btn" id="btn-iniciar">Iniciar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('btn-iniciar').addEventListener('click', () => {
+      const sel = document.getElementById('tipo-oficina');
+      if (!sel.value) {
+        sel.classList.add('error');
+        sel.focus();
+        return;
+      }
+      sel.classList.remove('error');
+      localStorage.setItem('tipo_oficina', sel.value);
+      window.location.href = sel.value === 'Externa'
+        ? 'oficina_externa.html'
+        : 'oficina_interna_movel.html';
+    });
+  </script>
 </body>
 </html>

@@ -1,61 +1,163 @@
-/* Estilos gerais da página */
+/* ============================================================
+   UNIDAS - Registro de Visita Oficina
+   style.css — Design System Unificado
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap');
+
+/* ── Variáveis ──────────────────────────────────────────── */
+:root {
+  --brand:        #0051AA;
+  --brand-dark:   #003c80;
+  --brand-light:  #e8f0fb;
+  --accent:       #FF6B00;
+  --success:      #18A558;
+  --danger:       #D9252A;
+  --warn-bg:      #fff3cd;
+  --warn-border:  #f0a500;
+  --warn-text:    #7a4800;
+
+  --bg:           #f0f4fb;
+  --surface:      #ffffff;
+  --border:       #dde3ee;
+  --text:         #1a2035;
+  --text-muted:   #6b7a99;
+  --radius:       14px;
+  --radius-sm:    8px;
+  --shadow:       0 4px 24px rgba(0,81,170,.10);
+  --shadow-lg:    0 8px 40px rgba(0,81,170,.16);
+  --transition:   .2s cubic-bezier(.4,0,.2,1);
+
+  --font-head:    'Sora', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+}
+
+/* ── Reset & Base ───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #0051AA;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+  font-family: var(--font-body);
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(0,81,170,.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(255,107,0,.08) 0%, transparent 60%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 16px 40px;
+  color: var(--text);
 }
 
+/* ── Container principal ────────────────────────────────── */
 .container {
-    width: 100%;
-    max-width: 600px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    box-sizing: border-box;
+  width: 100%;
+  max-width: 580px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Estilo para o logo */
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--brand), var(--accent));
+}
+
+/* ── Logo ───────────────────────────────────────────────── */
 .logo {
-    display: block;
-    max-width: 150px;
-    margin: 0 auto 20px;
-    border-radius: 8px;
+  display: block;
+  max-width: 130px;
+  margin: 0 auto 24px;
+  border-radius: var(--radius-sm);
 }
 
-/* Estilos dos cartões (seções) */
+/* ── Alerta de login ────────────────────────────────────── */
+.alerta-login {
+  background: var(--warn-bg);
+  border: 1.5px solid var(--warn-border);
+  color: var(--warn-text);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.alerta-login h5 { font-size: 1.4rem; margin-bottom: 4px; font-family: var(--font-head); }
+.alerta-login h1 { font-size: .85rem; font-weight: 500; line-height: 1.5; }
+
+/* ── Barra de progresso ─────────────────────────────────── */
+.progress-bar-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 28px;
+}
+.progress-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: var(--transition);
+}
+.progress-dot.active {
+  background: var(--brand);
+  width: 24px;
+  border-radius: 4px;
+}
+
+/* ── Card ───────────────────────────────────────────────── */
 .card {
-    padding: 20px;
+  animation: fadeSlide .28s ease;
+}
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-h2 {
-    color: #333;
-    text-align: center;
-    margin-bottom: 20px;
+/* ── Tipografia dos cards ───────────────────────────────── */
+.card h2 {
+  font-family: var(--font-head);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 20px;
+}
+.card h3 {
+  font-family: var(--font-head);
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--brand);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.card p {
+  color: var(--text-muted);
+  font-size: .95rem;
+  text-align: center;
+  margin-bottom: 20px;
+  line-height: 1.6;
 }
 
-h3 {
-    color: #0051AA;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-/* Estilos dos campos de entrada */
+/* ── Grupo de input ─────────────────────────────────────── */
 .input-group {
-    margin-bottom: 15px;
-    text-align: center;
+  margin-bottom: 16px;
+  text-align: left;
 }
 
 label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #555;
+  display: block;
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 6px;
 }
 
 input[type="text"],
@@ -63,169 +165,409 @@ input[type="tel"],
 input[type="email"],
 input[type="date"],
 input[type="time"],
-select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    font-size: 16px;
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: .95rem;
+  color: var(--text);
+  background: #fafbfd;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  appearance: none;
 }
 
-/* Estilos dos botões */
-.navigation-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(0,81,170,.12);
+  background: #fff;
 }
+
+input.error, select.error, textarea.error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px rgba(217,37,42,.10) !important;
+}
+
+select[multiple] {
+  height: auto;
+  min-height: 100px;
+  padding: 8px;
+}
+select[multiple] option {
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+select[multiple] option:checked {
+  background: var(--brand);
+  color: #fff;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+/* ── Botão de localização ───────────────────────────────── */
+#get-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 9px 16px;
+  background: var(--brand-light);
+  color: var(--brand);
+  border: 1.5px solid rgba(0,81,170,.2);
+  border-radius: var(--radius-sm);
+  font-size: .875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  width: 100%;
+  justify-content: center;
+}
+#get-location:hover { background: var(--brand); color: #fff; border-color: var(--brand); }
+#get-location::before { content: '📍'; }
+
+/* ── Autocomplete ───────────────────────────────────────── */
+#autocomplete-list {
+  list-style: none;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-top: 4px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  max-height: 200px;
+  overflow-y: auto;
+  position: relative;
+  z-index: 100;
+}
+#autocomplete-list li {
+  padding: 10px 14px;
+  font-size: .875rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+  line-height: 1.4;
+}
+#autocomplete-list li:last-child { border-bottom: none; }
+#autocomplete-list li:hover { background: var(--brand-light); color: var(--brand); }
+
+/* ── Botões de navegação ────────────────────────────────── */
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+.navigation-buttons:has(> :only-child) { justify-content: flex-end; }
 
 button {
-    padding: 12px 24px;
-    font-size: 16px;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+  font-family: var(--font-body);
+  font-size: .95rem;
+  font-weight: 600;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: var(--transition);
+  letter-spacing: .02em;
 }
 
-.next-btn, #submit-form {
-    background-color: #0051AA;
-    color: #fff;
+.next-btn, .submit-btn, .start-btn {
+  background: var(--brand);
+  color: #fff;
+  flex: 1;
+  max-width: 180px;
+  margin-left: auto;
+  box-shadow: 0 4px 14px rgba(0,81,170,.3);
 }
+.next-btn:hover, .submit-btn:hover, .start-btn:hover {
+  background: var(--brand-dark);
+  box-shadow: 0 6px 20px rgba(0,81,170,.4);
+  transform: translateY(-1px);
+}
+.next-btn:active, .submit-btn:active, .start-btn:active { transform: translateY(0); }
 
 .prev-btn {
-    background-color: #e0e0e0;
-    color: #333;
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+}
+.prev-btn:hover { background: var(--border); color: var(--text); }
+
+.submit-btn {
+  background: linear-gradient(135deg, var(--success), #14834a);
+  box-shadow: 0 4px 14px rgba(24,165,88,.3);
+  max-width: none;
+  flex: 1;
+}
+.submit-btn:hover {
+  box-shadow: 0 6px 20px rgba(24,165,88,.4);
+  transform: translateY(-1px);
 }
 
-.next-btn:hover, #submit-form:hover {
-    background-color: #003c80;
-}
-
-.prev-btn:hover {
-    background-color: #d0d0d0;
-}
-
-/* Estilos da barra de progresso */
-.progress-bar-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
-    gap: 10px;
-}
-
-.progress-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: #ccc;
-    transition: background-color 0.3s ease;
-}
-
-.progress-dot.active {
-    background-color: #0051AA;
-}
-
-/* Estilo para telas menores (smartphones) */
-@media (max-width: 600px) {
-    .container {
-        max-width: 100%;
-        margin: 0;
-        padding: 10px;
-        border-radius: 0;
-    }
+/* ── Botões Sim / Não ───────────────────────────────────── */
+.sim-nao-container {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin: 20px 0 16px;
 }
 
 .sim-nao-btn {
-    padding: 15px 50px;
-    font-size: 24px;
-    font-weight: bold;
-    color: #fff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-    margin: 15px;
+  flex: 1;
+  max-width: 160px;
+  padding: 16px 24px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: var(--radius);
+  border: 2px solid transparent;
+  transition: var(--transition);
+  cursor: pointer;
+}
+.sim-nao-btn[data-value="Sim"] {
+  background: var(--success);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(24,165,88,.25);
+}
+.sim-nao-btn[data-value="Sim"]:hover {
+  background: #14834a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(24,165,88,.35);
+}
+.sim-nao-btn[data-value="Nao"] {
+  background: var(--danger);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(217,37,42,.25);
+}
+.sim-nao-btn[data-value="Nao"]:hover {
+  background: #b01e23;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(217,37,42,.35);
 }
 
-.sim-nao-btn:hover {
-    background-color: #b30000;
+/* ── Pergunta Sim/Não layout ────────────────────────────── */
+.question-card label.question-label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text);
+  text-align: center;
+  display: block;
+  line-height: 1.6;
+  margin-bottom: 0;
 }
 
-#card-4 .input-group textarea, #card-5 .input-group textarea, #card-15 .input-group textarea, #card-6 .input-group textarea, #card-7 .input-group textarea, #card-7.card textarea, #card-7-alt.card textarea, #card-8-alt.card textarea, #card-9-alt.card textarea, #card-10-alt.card textarea, #card-11-alt.card textarea, #card-12-alt.card textarea, #card-13-alt.card textarea, #card-14-alt.card textarea, #card-15-alt.card textarea, #card-16-alt.card textarea, #card-16.card textarea, #card-8.card textarea {
-    width: 100%;
+/* ── Tabela de veículos (card-18 externa) ───────────────── */
+.vehicle-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.vehicle-table th {
+  background: var(--brand);
+  color: #fff;
+  font-size: .78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: 10px 8px;
+  text-align: left;
 }
+.vehicle-table td { padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.vehicle-table tr:last-child td { border-bottom: none; }
+.vehicle-table input,
+.vehicle-table select { font-size: .85rem; padding: 8px 10px; }
 
+/* ── Botão Home fixo ────────────────────────────────────── */
 .fixed-home-btn {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    font-size: 16px;
-    transition: background-color 0.3s ease;
+  position: fixed;
+  top: 16px; left: 16px;
+  z-index: 1000;
+  padding: 9px 16px;
+  background: var(--surface);
+  color: var(--brand);
+  border: 1.5px solid var(--border);
+  border-radius: 50px;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-
+.fixed-home-btn::before { content: '←'; }
 .fixed-home-btn:hover {
-    background-color: #0056b3;
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
 }
 
-#card-7.card textarea,
-#card-7-alt.card textarea,
-#card-8-alt.card textarea,
-#card-9-alt.card textarea,
-#card-10-alt.card textarea,
-#card-11-alt.card textarea,
-#card-12-alt.card textarea,
-#card-13-alt.card textarea,
-#card-14-alt.card textarea,
-#card-15-alt.card textarea,
-#card-16-alt.card textarea,
-#card-17-alt.card textarea,
-#card-16.card textarea,
-#card-9.card textarea,
-#card-10.card textarea,
-#card-11.card textarea,
-#card-17.card textarea,
-#card-8.card textarea {
-    width: 100%;
+/* ── Tela de sucesso ────────────────────────────────────── */
+.success-card {
+  text-align: center;
+  padding: 48px 32px;
+}
+.success-icon {
+  font-size: 3.5rem;
+  display: block;
+  margin-bottom: 16px;
+  animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.success-card h1 {
+  font-family: var(--font-head);
+  font-size: 1.5rem;
+  color: var(--success);
+  margin-bottom: 8px;
+}
+.success-card p { color: var(--text-muted); margin-bottom: 28px; }
+
+/* ── Indicador de loading no botão ─────────────────────── */
+button.loading {
+  opacity: .7;
+  pointer-events: none;
+  position: relative;
+}
+button.loading::after {
+  content: '';
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,.5);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Responsivo ─────────────────────────────────────────── */
+@media (max-width: 600px) {
+  body { padding: 12px 0 32px; align-items: flex-start; }
+  .container { border-radius: 0; padding: 24px 18px; box-shadow: none; }
+  .container::before { display: none; }
+  .sim-nao-btn { font-size: 1rem; padding: 14px 16px; }
+  .vehicle-table { font-size: .82rem; }
+  .fixed-home-btn { top: 8px; left: 8px; }
 }
 
-#card-4 .input-group textarea,
-#card-5 .input-group textarea,
-#card-15 .input-group textarea,
-#card-17 .input-group textarea,
-#card-18 .input-group textarea,
-#card-6 .input-group textarea,
-#card-7 .input-group textarea{
-    width: 100%;
+/* ── Card de veículos (Top 3 improdutivo) ───────────────── */
+.vehicle-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 8px;
 }
 
-.alerta-login {
-    background-color: #ffcccc; /* Fundo vermelho claro */
-    border: 2px solid #ff0000; /* Borda vermelha */
-    color: #cc0000; /* Texto em vermelho escuro */
-    padding: 15px; /* Espaçamento interno */
-    margin-bottom: 20px; /* Margem abaixo para separar do próximo elemento */
-    text-align: center; /* Centraliza o texto */
-    font-size: 0.6em; /* Aumenta o tamanho da fonte */
-    font-weight: bold; /* Deixa o texto em negrito */
-    border-radius: 8px; /* Cantos arredondados */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para dar profundidade */
+.vehicle-card {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #fafbfd;
 }
 
-/* Opcional: Estilo para o h1 dentro do alerta */
-.alerta-login h1 {
-    margin: 0; /* Remove margem padrão do h1 */
+.vehicle-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--brand);
+  padding: 10px 16px;
 }
-.alerta-login h5 {
-    margin: 0; /* Remove margem padrão do h5 */
-    font-size: 3.5em; /* Aumenta o tamanho da fonte */
+
+.vehicle-number {
+  font-family: var(--font-head);
+  font-size: .8rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.85);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+
+.placa-input {
+  flex: 1;
+  background: rgba(255,255,255,.15) !important;
+  border: 1.5px solid rgba(255,255,255,.3) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 8px 12px !important;
+  border-radius: var(--radius-sm) !important;
+  width: auto !important;
+}
+.placa-input::placeholder { color: rgba(255,255,255,.5) !important; }
+.placa-input:focus {
+  background: rgba(255,255,255,.25) !important;
+  border-color: rgba(255,255,255,.6) !important;
+  box-shadow: none !important;
+  outline: none;
+}
+
+.vehicle-card-body {
+  padding: 14px 16px 10px;
+}
+
+.vehicle-card-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.vehicle-card-body .input-group { margin-bottom: 10px; }
+.vehicle-card-body .input-group:last-child { margin-bottom: 0; }
+
+/* ── Card de visita completa (4b) ───────────────────────── */
+#card-4b p {
+  font-size: .95rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.7;
+  margin-bottom: 4px;
+}
+
+#card-4b .sim-nao-container {
+  margin-top: 20px;
+}
+
+@media (max-width: 480px) {
+  .vehicle-card-row { grid-template-columns: 1fr; }
+  .placa-input { font-size: .9rem !important; }
+}
+
+/* ── Toggle "Não informar" nos veículos ─────────────────── */
+.veiculo-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  color: rgba(255,255,255,.8);
+  font-size: .78rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+.veiculo-toggle input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Card desabilitado */
+.vehicle-card--disabled {
+  opacity: .55;
+}
+.vehicle-card--disabled .vehicle-card-header {
+  background: #6b7a99;
 }
