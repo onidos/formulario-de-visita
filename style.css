@@ -1,9 +1,9 @@
 /* ============================================================
-   UNIDAS - Registro de Visita Oficina
-   style.css — Design System Unificado
+   UNIDAS — Registro de Visita Oficina
+   style.css — Mobile-first Design System
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap');
 
 /* ── Variáveis ──────────────────────────────────────────── */
 :root {
@@ -22,58 +22,68 @@
   --border:       #dde3ee;
   --text:         #1a2035;
   --text-muted:   #6b7a99;
-  --radius:       14px;
-  --radius-sm:    8px;
+  --radius:       16px;
+  --radius-sm:    10px;
   --shadow:       0 4px 24px rgba(0,81,170,.10);
   --shadow-lg:    0 8px 40px rgba(0,81,170,.16);
   --transition:   .2s cubic-bezier(.4,0,.2,1);
 
   --font-head:    'Sora', sans-serif;
   --font-body:    'DM Sans', sans-serif;
+
+  /* Tamanhos base mobile */
+  --input-height: 52px;
+  --btn-height:   52px;
+  --font-input:   1rem;
+  --font-label:   .9rem;
 }
 
 /* ── Reset & Base ───────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+html { -webkit-text-size-adjust: 100%; }
+
 body {
   font-family: var(--font-body);
   background: var(--bg);
   background-image:
-    radial-gradient(ellipse at 20% 0%, rgba(0,81,170,.12) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 100%, rgba(255,107,0,.08) 0%, transparent 60%);
+    radial-gradient(ellipse at 20% 0%, rgba(0,81,170,.10) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(255,107,0,.07) 0%, transparent 55%);
   min-height: 100vh;
+  min-height: 100dvh; /* suporte a barra do browser mobile */
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 24px 16px 40px;
+  padding: 0 0 60px; /* espaço para barra de navegação mobile */
   color: var(--text);
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ── Container principal ────────────────────────────────── */
 .container {
   width: 100%;
-  max-width: 580px;
+  max-width: 600px;
   background: var(--surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-  padding: 32px 28px;
+  padding: 20px 16px 28px;
+  min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
-  overflow: hidden;
 }
 
 .container::before {
   content: '';
-  position: absolute;
+  position: fixed;
   top: 0; left: 0; right: 0;
   height: 4px;
   background: linear-gradient(90deg, var(--brand), var(--accent));
+  z-index: 100;
 }
 
 /* ── Logo ───────────────────────────────────────────────── */
 .logo {
   display: block;
-  max-width: 130px;
-  margin: 0 auto 24px;
+  max-width: 110px;
+  margin: 12px auto 20px;
   border-radius: var(--radius-sm);
 }
 
@@ -83,12 +93,12 @@ body {
   border: 1.5px solid var(--warn-border);
   color: var(--warn-text);
   border-radius: var(--radius-sm);
-  padding: 12px 16px;
-  margin-bottom: 24px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
   text-align: center;
 }
-.alerta-login h5 { font-size: 1.4rem; margin-bottom: 4px; font-family: var(--font-head); }
-.alerta-login h1 { font-size: .85rem; font-weight: 500; line-height: 1.5; }
+.alerta-login h5 { font-size: 1.3rem; margin-bottom: 4px; font-family: var(--font-head); }
+.alerta-login h1 { font-size: .82rem; font-weight: 500; line-height: 1.5; }
 
 /* ── Barra de progresso ─────────────────────────────────── */
 .progress-bar-container {
@@ -96,7 +106,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 .progress-dot {
   width: 8px; height: 8px;
@@ -112,25 +122,34 @@ body {
 
 /* ── Card ───────────────────────────────────────────────── */
 .card {
-  animation: fadeSlide .28s ease;
+  animation: fadeSlide .25s ease;
+  padding-top: 4px;
 }
 @keyframes fadeSlide {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-5px)}
+  40%{transform:translateX(5px)}
+  60%{transform:translateX(-3px)}
+  80%{transform:translateX(3px)}
+}
 
-/* ── Tipografia dos cards ───────────────────────────────── */
+/* ── Tipografia ─────────────────────────────────────────── */
 .card h2 {
   font-family: var(--font-head);
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--text);
   text-align: center;
   margin-bottom: 20px;
+  line-height: 1.3;
 }
 .card h3 {
   font-family: var(--font-head);
-  font-size: .75rem;
+  font-size: .72rem;
   font-weight: 600;
   color: var(--brand);
   text-transform: uppercase;
@@ -140,7 +159,7 @@ body {
 }
 .card p {
   color: var(--text-muted);
-  font-size: .95rem;
+  font-size: .9rem;
   text-align: center;
   margin-bottom: 20px;
   line-height: 1.6;
@@ -148,18 +167,20 @@ body {
 
 /* ── Grupo de input ─────────────────────────────────────── */
 .input-group {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   text-align: left;
 }
 
 label {
   display: block;
-  font-size: .85rem;
-  font-weight: 500;
+  font-size: var(--font-label);
+  font-weight: 600;
   color: var(--text-muted);
-  margin-bottom: 6px;
+  margin-bottom: 7px;
+  line-height: 1.3;
 }
 
+/* ── Inputs — grandes o suficiente para dedos ───────────── */
 input[type="text"],
 input[type="tel"],
 input[type="email"],
@@ -169,15 +190,19 @@ input[type="number"],
 select,
 textarea {
   width: 100%;
-  padding: 11px 14px;
+  min-height: var(--input-height);
+  padding: 12px 14px;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   font-family: var(--font-body);
-  font-size: .95rem;
+  font-size: var(--font-input);
   color: var(--text);
   background: #fafbfd;
   transition: border-color var(--transition), box-shadow var(--transition);
   appearance: none;
+  -webkit-appearance: none;
+  /* evita zoom automático no iOS ao focar */
+  font-size: max(16px, var(--font-input));
 }
 
 input:focus, select:focus, textarea:focus {
@@ -192,15 +217,24 @@ input.error, select.error, textarea.error {
   box-shadow: 0 0 0 3px rgba(217,37,42,.10) !important;
 }
 
+/* Select: ícone de seta customizado */
+select:not([multiple]) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7a99' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 42px;
+}
+
 select[multiple] {
-  height: auto;
-  min-height: 100px;
+  min-height: 120px;
   padding: 8px;
+  height: auto;
 }
 select[multiple] option {
-  padding: 6px 8px;
-  border-radius: 4px;
-  cursor: pointer;
+  padding: 10px 10px;
+  border-radius: 6px;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 select[multiple] option:checked {
   background: var(--brand);
@@ -209,30 +243,34 @@ select[multiple] option:checked {
 
 textarea {
   resize: vertical;
-  min-height: 100px;
+  min-height: 110px;
   line-height: 1.6;
+  font-size: max(16px, var(--font-input)); /* evita zoom iOS */
 }
 
 /* ── Botão de localização ───────────────────────────────── */
 #get-location {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 8px;
-  padding: 9px 16px;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 14px 16px;
+  min-height: var(--btn-height);
   background: var(--brand-light);
   color: var(--brand);
   border: 1.5px solid rgba(0,81,170,.2);
   border-radius: var(--radius-sm);
-  font-size: .875rem;
-  font-weight: 500;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
   width: 100%;
-  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
 }
-#get-location:hover { background: var(--brand); color: #fff; border-color: var(--brand); }
-#get-location::before { content: '📍'; }
+#get-location:active { background: var(--brand); color: #fff; }
+#get-location::before { content: '📍'; font-size: 1.1rem; }
 
 /* ── Autocomplete ───────────────────────────────────────── */
 #autocomplete-list {
@@ -242,64 +280,69 @@ textarea {
   margin-top: 4px;
   background: var(--surface);
   box-shadow: var(--shadow);
-  max-height: 200px;
+  max-height: 220px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   position: relative;
   z-index: 100;
 }
 #autocomplete-list li {
-  padding: 10px 14px;
-  font-size: .875rem;
+  padding: 14px;
+  font-size: .9rem;
   cursor: pointer;
   border-bottom: 1px solid var(--border);
   transition: background var(--transition);
   line-height: 1.4;
+  -webkit-tap-highlight-color: transparent;
 }
 #autocomplete-list li:last-child { border-bottom: none; }
-#autocomplete-list li:hover { background: var(--brand-light); color: var(--brand); }
+#autocomplete-list li:active { background: var(--brand-light); }
 
 /* ── Botões de navegação ────────────────────────────────── */
 .navigation-buttons {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  margin-top: 24px;
+  gap: 10px;
+  margin-top: 28px;
 }
 .navigation-buttons:has(> :only-child) { justify-content: flex-end; }
 
 button {
   font-family: var(--font-body);
-  font-size: .95rem;
+  font-size: 1rem;
   font-weight: 600;
-  padding: 12px 28px;
+  min-height: var(--btn-height);
+  padding: 14px 20px;
   border: none;
   border-radius: 50px;
   cursor: pointer;
   transition: var(--transition);
   letter-spacing: .02em;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; /* remove delay de 300ms no iOS */
 }
 
 .next-btn, .submit-btn, .start-btn {
   background: var(--brand);
   color: #fff;
   flex: 1;
-  max-width: 180px;
+  max-width: 190px;
   margin-left: auto;
   box-shadow: 0 4px 14px rgba(0,81,170,.3);
 }
-.next-btn:hover, .submit-btn:hover, .start-btn:hover {
+.next-btn:active, .submit-btn:active, .start-btn:active {
   background: var(--brand-dark);
-  box-shadow: 0 6px 20px rgba(0,81,170,.4);
-  transform: translateY(-1px);
+  transform: scale(.97);
 }
-.next-btn:active, .submit-btn:active, .start-btn:active { transform: translateY(0); }
 
 .prev-btn {
   background: var(--bg);
   color: var(--text-muted);
   border: 1.5px solid var(--border);
+  flex: 0 0 auto;
+  padding: 14px 18px;
 }
-.prev-btn:hover { background: var(--border); color: var(--text); }
+.prev-btn:active { background: var(--border); }
 
 .submit-btn {
   background: linear-gradient(135deg, var(--success), #14834a);
@@ -307,158 +350,65 @@ button {
   max-width: none;
   flex: 1;
 }
-.submit-btn:hover {
-  box-shadow: 0 6px 20px rgba(24,165,88,.4);
-  transform: translateY(-1px);
+.submit-btn:active {
+  background: #14834a;
+  transform: scale(.97);
 }
 
 /* ── Botões Sim / Não ───────────────────────────────────── */
 .sim-nao-container {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   justify-content: center;
   margin: 20px 0 16px;
 }
 
 .sim-nao-btn {
   flex: 1;
-  max-width: 160px;
-  padding: 16px 24px;
-  font-size: 1.1rem;
+  min-height: 60px;
+  padding: 16px 12px;
+  font-family: var(--font-body);
+  font-size: 1.15rem;
   font-weight: 700;
   border-radius: var(--radius);
-  border: 2px solid transparent;
+  border: none;
   transition: var(--transition);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .sim-nao-btn[data-value="Sim"] {
   background: var(--success);
   color: #fff;
   box-shadow: 0 4px 14px rgba(24,165,88,.25);
 }
-.sim-nao-btn[data-value="Sim"]:hover {
+.sim-nao-btn[data-value="Sim"]:active {
   background: #14834a;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(24,165,88,.35);
+  transform: scale(.96);
 }
 .sim-nao-btn[data-value="Nao"] {
   background: var(--danger);
   color: #fff;
   box-shadow: 0 4px 14px rgba(217,37,42,.25);
 }
-.sim-nao-btn[data-value="Nao"]:hover {
+.sim-nao-btn[data-value="Nao"]:active {
   background: #b01e23;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(217,37,42,.35);
+  transform: scale(.96);
 }
 
-/* ── Pergunta Sim/Não layout ────────────────────────────── */
-.question-card label.question-label {
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--text);
-  text-align: center;
+/* ── Label de pergunta Sim/Não ──────────────────────────── */
+.question-label {
+  font-size: .95rem !important;
+  font-weight: 500 !important;
+  color: var(--text) !important;
+  text-align: center !important;
   display: block;
   line-height: 1.6;
-  margin-bottom: 0;
+  margin-bottom: 0 !important;
+  padding: 0 4px;
 }
 
-/* ── Tabela de veículos (card-18 externa) ───────────────── */
-.vehicle-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-.vehicle-table th {
-  background: var(--brand);
-  color: #fff;
-  font-size: .78rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  padding: 10px 8px;
-  text-align: left;
-}
-.vehicle-table td { padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
-.vehicle-table tr:last-child td { border-bottom: none; }
-.vehicle-table input,
-.vehicle-table select { font-size: .85rem; padding: 8px 10px; }
-
-/* ── Botão Home fixo ────────────────────────────────────── */
-.fixed-home-btn {
-  position: fixed;
-  top: 16px; left: 16px;
-  z-index: 1000;
-  padding: 9px 16px;
-  background: var(--surface);
-  color: var(--brand);
-  border: 1.5px solid var(--border);
-  border-radius: 50px;
-  font-size: .85rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: var(--shadow);
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.fixed-home-btn::before { content: '←'; }
-.fixed-home-btn:hover {
-  background: var(--brand);
-  color: #fff;
-  border-color: var(--brand);
-}
-
-/* ── Tela de sucesso ────────────────────────────────────── */
-.success-card {
-  text-align: center;
-  padding: 48px 32px;
-}
-.success-icon {
-  font-size: 3.5rem;
-  display: block;
-  margin-bottom: 16px;
-  animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
-}
-@keyframes popIn {
-  from { transform: scale(0); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
-}
-.success-card h1 {
-  font-family: var(--font-head);
-  font-size: 1.5rem;
-  color: var(--success);
-  margin-bottom: 8px;
-}
-.success-card p { color: var(--text-muted); margin-bottom: 28px; }
-
-/* ── Indicador de loading no botão ─────────────────────── */
-button.loading {
-  opacity: .7;
-  pointer-events: none;
-  position: relative;
-}
-button.loading::after {
-  content: '';
-  display: inline-block;
-  width: 14px; height: 14px;
-  border: 2px solid rgba(255,255,255,.5);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin .7s linear infinite;
-  margin-left: 8px;
-  vertical-align: middle;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── Responsivo ─────────────────────────────────────────── */
-@media (max-width: 600px) {
-  body { padding: 12px 0 32px; align-items: flex-start; }
-  .container { border-radius: 0; padding: 24px 18px; box-shadow: none; }
-  .container::before { display: none; }
-  .sim-nao-btn { font-size: 1rem; padding: 14px 16px; }
-  .vehicle-table { font-size: .82rem; }
-  .fixed-home-btn { top: 8px; left: 8px; }
-}
-
-/* ── Card de veículos (Top 3 improdutivo) ───────────────── */
+/* ── Card de veículos ───────────────────────────────────── */
 .vehicle-cards {
   display: flex;
   flex-direction: column;
@@ -476,14 +426,14 @@ button.loading::after {
 .vehicle-card-header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   background: var(--brand);
-  padding: 10px 16px;
+  padding: 12px 14px;
 }
 
 .vehicle-number {
   font-family: var(--font-head);
-  font-size: .8rem;
+  font-size: .78rem;
   font-weight: 700;
   color: rgba(255,255,255,.85);
   text-transform: uppercase;
@@ -497,12 +447,13 @@ button.loading::after {
   border: 1.5px solid rgba(255,255,255,.3) !important;
   color: #fff !important;
   font-weight: 700 !important;
-  font-size: 1rem !important;
   letter-spacing: .08em;
   text-transform: uppercase;
-  padding: 8px 12px !important;
+  padding: 10px 12px !important;
   border-radius: var(--radius-sm) !important;
+  min-height: 44px !important;
   width: auto !important;
+  font-size: max(16px, 1rem) !important; /* evita zoom iOS */
 }
 .placa-input::placeholder { color: rgba(255,255,255,.5) !important; }
 .placa-input:focus {
@@ -512,62 +463,144 @@ button.loading::after {
   outline: none;
 }
 
-.vehicle-card-body {
-  padding: 14px 16px 10px;
-}
+.vehicle-card-body { padding: 14px 14px 10px; }
 
 .vehicle-card-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 
 .vehicle-card-body .input-group { margin-bottom: 10px; }
 .vehicle-card-body .input-group:last-child { margin-bottom: 0; }
 
-/* ── Card de visita completa (4b) ───────────────────────── */
-#card-4b p {
-  font-size: .95rem;
-  color: var(--text-muted);
-  text-align: center;
-  line-height: 1.7;
-  margin-bottom: 4px;
-}
-
-#card-4b .sim-nao-container {
-  margin-top: 20px;
-}
-
-@media (max-width: 480px) {
-  .vehicle-card-row { grid-template-columns: 1fr; }
-  .placa-input { font-size: .9rem !important; }
-}
-
-/* ── Toggle "Não informar" nos veículos ─────────────────── */
+/* ── Toggle "Não informar" ──────────────────────────────── */
 .veiculo-toggle {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-left: auto;
-  color: rgba(255,255,255,.8);
+  color: rgba(255,255,255,.85);
   font-size: .78rem;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .veiculo-toggle input[type="checkbox"] {
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
   accent-color: #fff;
   cursor: pointer;
   flex-shrink: 0;
 }
 
-/* Card desabilitado */
-.vehicle-card--disabled {
-  opacity: .55;
+.vehicle-card--disabled { opacity: .5; }
+.vehicle-card--disabled .vehicle-card-header { background: #6b7a99; }
+
+/* ── Card 4b — Tipo de visita ───────────────────────────── */
+#card-4b p {
+  font-size: .92rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.7;
+  margin-bottom: 4px;
 }
-.vehicle-card--disabled .vehicle-card-header {
-  background: #6b7a99;
+#card-4b .sim-nao-container { margin-top: 20px; }
+
+/* ── Botão Home fixo ────────────────────────────────────── */
+.fixed-home-btn {
+  position: fixed;
+  top: 12px; left: 12px;
+  z-index: 200;
+  padding: 10px 16px;
+  min-height: 44px;
+  background: var(--surface);
+  color: var(--brand);
+  border: 1.5px solid var(--border);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.fixed-home-btn::before { content: '←'; }
+.fixed-home-btn:active { background: var(--brand); color: #fff; }
+
+/* ── Loading no botão ───────────────────────────────────── */
+button.loading {
+  opacity: .7;
+  pointer-events: none;
+}
+button.loading::after {
+  content: '';
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Tela de sucesso ────────────────────────────────────── */
+.success-card {
+  text-align: center;
+  padding: 40px 24px;
+}
+.success-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 14px;
+  animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* ── Desktop: container com sombra e espaço ─────────────── */
+@media (min-width: 600px) {
+  body {
+    padding: 32px 16px 48px;
+    align-items: flex-start;
+  }
+  .container {
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 32px 28px;
+    min-height: auto;
+  }
+  .container::before {
+    position: absolute;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+
+  /* Inputs ligeiramente menores no desktop */
+  :root {
+    --input-height: 46px;
+    --btn-height:   46px;
+  }
+  input[type="text"],
+  input[type="tel"],
+  input[type="email"],
+  input[type="date"],
+  input[type="time"],
+  input[type="number"],
+  select:not([multiple]),
+  textarea { font-size: .95rem; }
+
+  .next-btn, .submit-btn, .start-btn { max-width: 180px; }
+
+  .vehicle-card-row { gap: 12px; }
 }
