@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔍 Debug GAS — Interna/Móvel</title>
+  <style>
+    body { font-family: monospace; padding: 24px; background: #1e1e2e; color: #cdd6f4; }
+    h2 { color: #89dceb; }
+    .box { background: #313244; border-radius: 8px; padding: 16px; margin: 12px 0; white-space: pre-wrap; word-break: break-all; font-size: 13px; }
+    .ok    { border-left: 4px solid #a6e3a1; }
+    .erro  { border-left: 4px solid #f38ba8; }
+    .info  { border-left: 4px solid #89b4fa; }
+    button { background: #cba6f7; color: #1e1e2e; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; margin: 4px; }
+    label  { display: block; margin: 8px 0 4px; color: #a6adc8; }
+    input  { background: #45475a; border: 1px solid #585b70; color: #cdd6f4; padding: 8px; border-radius: 4px; width: 100%; box-sizing: border-box; }
+    #log   { max-height: 400px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <h2>🔍 Diagnóstico — GAS Oficina Interna/Móvel</h2>
+
+  <p style="color:#a6adc8">Este arquivo testa o seu Google Apps Script diretamente e mostra a resposta real,
+  sem o <code>catch</code> silencioso do <code>form-utils.js</code>.</p>
+
+  <div>
+    <label>URL do GAS (pode alterar para testar outro deploy):</label>
+    <input id="gas-url" value="https://script.google.com/macros/s/AKfycbw8Cb4bWLDFrBFhWIiunHyPglA2_GErehdvdDvHfJL7IpDYQcYCsYG8UG_-IO2QN8M/exec">
+  </div>
+
+  <br>
+  <button onclick="testarGET()">1. Testar GET (ping)</button>
+  <button onclick="testarPOST_minimo()">2. POST mínimo (só nome)</button>
+  <button onclick="testarPOST_completo()">3. POST completo (todos os campos)</button>
+  <button onclick="limpar()">🗑 Limpar log</button>
+
+  <div id="log"></div>
+
+  <script>
+    const URL = () => document.getElementById('gas-url').value.trim();
+
+    function log(titulo, conteudo, tipo = 'info') {
+      const d = document.getElementById('log');
+      const ts = new Date().toLocaleTimeString('pt-BR');
+      d.innerHTML += `<div class="box ${tipo}"><strong>[${ts}] ${titulo}</strong>\n${conteudo}</div>`;
+      d.scrollTop = d.scrollHeight;
+    }
+
+    function limpar() { document.getElementById('log').innerHTML = ''; }
+
+    // ── 1. GET simples ──────────────────────────────────────
+    async function testarGET() {
+      log('GET → ' + URL(), 'Aguardando resposta...', 'info');
+      try {
+        const r = await fetch(URL(), { method: 'GET' });
+        const txt = await r.text();
+        const tipo = r.ok ? 'ok' : 'erro';
+        log(`GET ← HTTP ${r.status}`, `Headers: ${[...r.headers.entries()].map(([k,v])=>`${k}: ${v}`).join('\n')}\n\nBody (primeiros 500 chars):\n${txt.slice(0,500)}`, tipo);
+      } catch(e) {
+        log('GET — ERRO (provavelmente CORS, normal para GAS)', e.message, 'erro');
+        log('ℹ️ CORS no GET', 'Se deu erro de CORS, o endpoint existe mas bloqueia origens cruzadas.\nIsso é normal — use o botão POST para testar o que importa.', 'info');
+      }
+    }
+
+    // ── 2. POST mínimo ──────────────────────────────────────
+    async function testarPOST_minimo() {
+      const body = new URLSearchParams({ 'entry.736701652': 'TESTE_DEBUG' });
+      log('POST mínimo → ' + URL(), body.toString(), 'info');
+      try {
+        const r = await fetch(URL(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body.toString()
+        });
+        const txt = await r.text();
+        const tipo = r.ok ? 'ok' : 'erro';
+        log(`POST mínimo ← HTTP ${r.status}`, txt.slice(0, 1000), tipo);
+        tentarParsearJSON(txt);
+      } catch(e) {
+        log('POST mínimo — ERRO', e.message + '\n\nSe for CORS: o GAS respondeu algo (provavelmente erro/login).\nAbra o Network tab do DevTools e veja a resposta real.', 'erro');
+      }
+    }
+
+    // ── 3. POST completo ────────────────────────────────────
+    async function testarPOST_completo() {
+      const params = {
+        'entry.1234567':    'Interna',
+        'entry.736701652':  'Analista Teste Debug',
+        'entry.2772692101': '00000000000100',
+        'entry.976127741':  'Oficina Teste Debug',
+        'entry.1423595019': '2026-04-14',
+        'entry.1730838108': '10:00',
+        'entry.783598008':  'Rua Teste, 123, Campinas - SP',
+        'entry.1310088869': 'Corretiva',
+        'entry.406949508':  'RAC',
+        'entry.406949569':  'Auditoria de Rotina',
+        'entry.1340241431': 'Sim',
+        'entry.1294732012': '',
+        'entry.2115532596': 'Sim',
+        'entry.2007962701': '',
+        'entry.39418910':   'Sim',
+        'entry.1911175375': '',
+        'entry.1145570993': 'Sim',
+        'entry.1825664990': '',
+        'entry.243474358':  '5',
+        'entry.1542147720': '1',
+        'entry.1147423564': '1',
+        'entry.1953860915': '2',
+        'entry.1055686739': '1',
+        'entry.1056386731': '0',
+        'entry.1528463567': '2',
+        'entry.1359946908': 'Nao',
+        'entry.1986006638': '',
+        'placa1': 'ABC-1234',
+        'servico1': 'Corretiva',
+        'data1': '2026-04-15',
+        'status1': 'Em Serviço',
+        'placa2': '',
+        'placa3': '',
+      };
+
+      const body = new URLSearchParams(params);
+      log('POST completo → ' + URL(), 'Enviando todos os campos...', 'info');
+      log('Payload', body.toString(), 'info');
+
+      try {
+        const r = await fetch(URL(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body.toString()
+        });
+        const txt = await r.text();
+        const tipo = r.ok ? 'ok' : 'erro';
+        log(`POST completo ← HTTP ${r.status}`, txt.slice(0, 2000), tipo);
+        tentarParsearJSON(txt);
+      } catch(e) {
+        log('POST completo — ERRO CORS', 
+          `Mensagem: ${e.message}\n\n` +
+          `⚠️ CORS impede ler a resposta aqui, mas o POST pode ter chegado ao GAS.\n\n` +
+          `PRÓXIMO PASSO: Abra o Google Apps Script em:\n` +
+          `https://script.google.com\n` +
+          `→ Clique no projeto → Execuções (Executions)\n` +
+          `→ Veja se o doPost aparece com ✅ ou ❌\n` +
+          `→ Se ❌: clique para ver o erro exato`,
+          'erro');
+      }
+    }
+
+    function tentarParsearJSON(txt) {
+      try {
+        const j = JSON.parse(txt);
+        log('✅ JSON parseado com sucesso', JSON.stringify(j, null, 2), j.status === 'ok' ? 'ok' : 'erro');
+      } catch(_) {
+        log('⚠️ Resposta não é JSON', 'Isso indica que o GAS retornou uma página de erro, login ou HTML.\n\nVerifique:\n1. O Web App está publicado como "Execute as: Me" e "Who has access: Anyone"\n2. Não há erro de sintaxe no Code.gs\n3. O deploy foi feito APÓS a última edição do script', 'erro');
+      }
+    }
+  </script>
+</body>
+</html>
