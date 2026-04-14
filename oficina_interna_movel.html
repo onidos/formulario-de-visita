@@ -14,8 +14,7 @@
 
     <form id="agendamento-form"
       action="https://script.google.com/macros/s/AKfycbw8Cb4bWLDFrBFhWIiunHyPglA2_GErehdvdDvHfJL7IpDYQcYCsYG8UG_-IO2QN8M/exec"
-      method="POST"
-      enctype="multipart/form-data">
+      method="POST">
 
       <input type="hidden" id="tipo-oficina-hidden" name="entry.1234567">
 
@@ -344,7 +343,7 @@
             <div class="vehicle-card-body" id="veiculo-body-1">
               <div class="input-group">
                 <label>Tipo de Serviço</label>
-                <select name="servico1[]" multiple required>
+                <select name="servico1" multiple required>
                   <option value="Preventiva">Preventiva</option>
                   <option value="Corretiva">Corretiva</option>
                   <option value="Sinistro">Sinistro</option>
@@ -381,7 +380,7 @@
             <div class="vehicle-card-body" id="veiculo-body-2">
               <div class="input-group">
                 <label>Tipo de Serviço</label>
-                <select name="servico2[]" multiple >
+                <select name="servico2" multiple >
                   <option value="Preventiva">Preventiva</option>
                   <option value="Corretiva">Corretiva</option>
                   <option value="Sinistro">Sinistro</option>
@@ -418,7 +417,7 @@
             <div class="vehicle-card-body" id="veiculo-body-3">
               <div class="input-group">
                 <label>Tipo de Serviço</label>
-                <select name="servico3[]" multiple >
+                <select name="servico3" multiple >
                   <option value="Preventiva">Preventiva</option>
                   <option value="Corretiva">Corretiva</option>
                   <option value="Sinistro">Sinistro</option>
