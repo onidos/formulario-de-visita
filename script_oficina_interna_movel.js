@@ -31,22 +31,30 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = 'index_visita_oficina.html';
   });
 
+  // ── Card 0b: Presencial / Telefone ───────────────────────
+  document.getElementById('btn-presencial')?.addEventListener('click', () => {
+    document.getElementById('presencial-telefone').value = 'Presencial';
+    engine.showCard('2');
+  });
+  document.getElementById('btn-telefone')?.addEventListener('click', () => {
+    document.getElementById('presencial-telefone').value = 'Telefone';
+    engine.showCard('2');
+  });
+
   // ── Card 4b: lógica de prospecção e visita completa ──────
   form.querySelectorAll('.visita-completa-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopImmediatePropagation();
       const resposta = btn.dataset.value;
       if (isProspeccao()) {
-        // Prospecção: vai à auditoria normalmente (card 5)
         engine.showCard('5');
       } else {
-        // Normal: Sim = auditoria completa, Não = pula para card 9-alt
         engine.showCard(resposta === 'Sim' ? '5' : '9-alt');
       }
     }, true);
   });
 
-  // ── Submit: principal e prospecção ───────────────────────
+  // ── Submit ───────────────────────────────────────────────
   function setupSubmit(btn) {
     if (!btn) return;
     btn.addEventListener('click', (e) => {
@@ -73,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cardId = card.id.replace('card-', '');
 
     if (cardId === '15-alt') {
-      const total    = parseInt(document.getElementById('veiculos-manutencao')?.value) || 0;
+      const total     = parseInt(document.getElementById('veiculos-manutencao')?.value) || 0;
       const entregues = parseInt(document.getElementById('veiculos-entregues')?.value) || 0;
       if (entregues > total) {
         document.getElementById('veiculos-entregues')?.classList.add('error');
@@ -85,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function validacaoSimNaoEspecifica(card, cardId, resposta) {
-    // 4b: tratado pelo listener acima, bloqueia o engine
     if (cardId === '4b') return false;
 
     if (cardId === '16-alt' && resposta === 'Sim') {
@@ -109,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (ta) ta.classList.remove('error');
     }
 
-    // Card 8-alt: se prospecção → vai para card-8-fim
     if (cardId === '8-alt' && isProspeccao()) {
       engine.showCard('8-fim');
       return false;

@@ -13,11 +13,12 @@
     <img src="imagens/logo.png" alt="Logo da Unidas" class="logo">
 
     <form id="agendamento-form"
-      action="https://script.google.com/macros/s/AKfycbzVhTYFfEZl5X9XRRKaIt8jr_k6hU2B6W1wUNhFlChL0hsvX7tdRpUsglXWw-fhVC-K/exec"
+      action="https://script.google.com/macros/s/AKfycby1CR9y7dHO8b60zy28_eWJdcDr6WG-y8oQY3ioh_f9gaFzLUnh1VNV6en4eWWihtvI/exec"
       method="POST"
       enctype="multipart/form-data">
 
       <input type="hidden" id="tipo-oficina-hidden" name="entry.1234567">
+      <input type="hidden" id="presencial-telefone" name="presencial_telefone">
 
       <!-- Card 1: Analista -->
       <div class="card" id="card-1">
@@ -27,7 +28,20 @@
           <input type="text" id="nome" autocomplete="name" name="entry.277269067" required>
         </div>
         <div class="navigation-buttons">
-          <button type="button" class="next-btn" data-card="100">Próximo</button>
+          <button type="button" class="next-btn" data-card="0b">Próximo</button>
+        </div>
+      </div>
+
+      <!-- Card 0b: Presencial ou Telefone -->
+      <div class="card" id="card-0b" style="display:none">
+        <h2>Tipo de Contato</h2>
+        <p>A visita foi realizada de forma presencial ou por telefone?</p>
+        <div class="sim-nao-container" style="margin-top:8px;">
+          <button type="button" id="btn-presencial">Presencial</button>
+          <button type="button" id="btn-telefone">Telefone</button>
+        </div>
+        <div class="navigation-buttons">
+          <button type="button" class="prev-btn" data-card="1">Anterior</button>
         </div>
       </div>
 
@@ -39,7 +53,7 @@
           <input type="text" id="CNPJ_Oficina" name="entry.2772692101" inputmode="numeric" pattern="\d*" required>
         </div>
         <div class="navigation-buttons">
-          <button type="button" class="prev-btn" data-card="1">Anterior</button>
+          <button type="button" class="prev-btn" data-card="0b">Anterior</button>
           <button type="button" class="next-btn" data-card="2">Próximo</button>
         </div>
       </div>
