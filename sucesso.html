@@ -117,12 +117,13 @@
       const loading = document.getElementById('loading');
       const novoBtn = document.getElementById('novo-btn');
 
-      // Lê o resultado salvo pelo form-utils.js
+      // Lê o resultado salvo pelo form-utils.js (via AppStorage / sessionStorage)
+      const _key = (k) => `visita_oficina__${k}`;
       let resultado = { planilha: 'desconhecido', email: 'desconhecido' };
       try {
-        const raw = localStorage.getItem('submit_result');
+        const raw = sessionStorage.getItem(_key('submit_result'));
         if (raw) resultado = JSON.parse(raw);
-        localStorage.removeItem('submit_result');
+        sessionStorage.removeItem(_key('submit_result'));
       } catch (_) {}
 
       const { planilha, email, erro } = resultado;
@@ -187,7 +188,7 @@
 
       novoBtn.style.display = 'block';
       novoBtn.addEventListener('click', () => {
-        localStorage.removeItem('tipo_oficina');
+        sessionStorage.removeItem(_key('tipo_oficina'));
         window.location.href = 'index_visita_oficina.html';
       });
     });

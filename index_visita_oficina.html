@@ -36,7 +36,31 @@
   </div>
 
   <script>
-    document.getElementById('btn-iniciar').addEventListener('click', () => {
+    const _key = (k) => `visita_oficina__${k}`;
+
+    // Bloqueia fora do horário permitido (07:30–18:30)
+    (function() {
+      const agora    = new Date();
+      const total    = agora.getHours() * 60 + agora.getMinutes();
+      const inicio   = 7 * 60 + 30;
+      const fim      = 18 * 60 + 30;
+      if (total < inicio || total > fim) {
+        const h = String(agora.getHours()).padStart(2,'0');
+        const m = String(agora.getMinutes()).padStart(2,'0');
+        document.querySelector('.container').innerHTML = `
+          <img src="imagens/logo.png" alt="Logo da Unidas" class="logo">
+          <div class="card" style="text-align:center;padding:48px 24px;">
+            <div style="font-size:3rem;margin-bottom:16px;">🔒</div>
+            <h2>Fora do Horário</h2>
+            <p style="color:var(--text-muted);">
+              O preenchimento está disponível apenas das <strong>07:30</strong> às <strong>18:30</strong>.<br>
+              Horário atual: <strong>${h}:${m}</strong>
+            </p>
+          </div>`;
+      }
+    })();
+
+    document.getElementById('btn-iniciar')?.addEventListener('click', () => {
       const sel = document.getElementById('tipo-oficina');
       if (!sel.value) {
         sel.classList.add('error');
@@ -44,7 +68,7 @@
         return;
       }
       sel.classList.remove('error');
-      localStorage.setItem('tipo_oficina', sel.value);
+      sessionStorage.setItem(_key('tipo_oficina'), JSON.stringify(sel.value));
       window.location.href = sel.value === 'Externa'
         ? 'oficina_externa.html'
         : 'oficina_interna_movel.html';

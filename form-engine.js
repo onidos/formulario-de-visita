@@ -101,8 +101,9 @@ class FormEngine {
         const comentario = card.querySelector('textarea');
 
         // Validação padrão: comentário obrigatório quando "Não"
-        const cardsComComentarioObrigNao = ['4', '5', '6', '7', '7-alt'];
-        if (cardsComComentarioObrigNao.includes(cardId) && resposta === 'Nao') {
+        // Ativado via atributo data-require-comment-on-nao no .card
+        const requireComment = card.dataset.requireCommentOnNao === 'true';
+        if (requireComment && resposta === 'Nao') {
           if (comentario && !comentario.value.trim()) {
             comentario.classList.add('error');
             alert('Por favor, descreva o que precisa ser melhorado.');
@@ -146,7 +147,7 @@ class FormEngine {
   }
 
   _carregarTipoOficina() {
-    const tipo = localStorage.getItem('tipo_oficina');
+    const tipo = AppStorage.get('tipo_oficina');
     const hidden = this.form.querySelector('#tipo-oficina-hidden');
     if (tipo && hidden) hidden.value = tipo;
   }
