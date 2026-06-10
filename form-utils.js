@@ -226,6 +226,13 @@ function validarCard(card) {
       ok = input.value.trim().length >= parseInt(input.dataset.minlength);
     }
 
+    // Validação: somente letras e espaços (sem números)
+    if (ok && input.dataset.onlyletters === 'true') {
+      ok = /^[a-zA-ZÀ-ÿ\s]+$/.test(input.value.trim());
+    }
+
+    // Validação extra para campos CNPJ
+
     // Validação extra para campos CNPJ
     if (ok && input.dataset.cnpjInput === 'true') {
       const digits = input.value.replace(/\D/g, '');
