@@ -132,13 +132,19 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         if (!validarCard(card)) { engine._shakeCard(card); alert('Por favor, preencha todos os campos obrigatórios.'); return; }
 
-        // Modo manual: exige foto de cada veículo preenchido (só em visitas presenciais)
+        // Modo manual: exige foto de cada veículo preenchido (só em visitas
+        // presenciais) — exceto quando o status é "Fora de Serviço", já que
+        // o carro ainda não está fisicamente na oficina pra fotografar.
         if (isPresencial()) {
           const veiculosAtivos = [1, 2, 3].filter(n => {
             const placaInput = form.querySelector(`[name="placa${n}"]`);
             return placaInput && !placaInput.disabled && placaInput.value.trim();
           });
-          const semFoto = veiculosAtivos.find(n => fotosManuais[n].length === 0);
+          const semFoto = veiculosAtivos.find(n => {
+            const statusInput = form.querySelector(`[name="status${n}"]`);
+            const foraDeServico = statusInput && statusInput.value === 'Fora de Serviço';
+            return !foraDeServico && fotosManuais[n].length === 0;
+          });
           if (semFoto) {
             alert(`Por favor, adicione uma foto do Veículo ${semFoto} (obrigatória para visitas presenciais).`);
             return;
@@ -366,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (modoManual) modoManual.style.display  = 'none';
 
       if (aviso) {
-        aviso.textContent = '⚠️ Status, Tipo de Serviço e Ação são obrigatórios para todos os veículos.';
+        aviso.textContent = '⚠️ Status e Ação são obrigatórios para todos os veículos. Foto é obrigatória em visitas presenciais, exceto para veículos "Fora de Serviço".';
         aviso.style.display = 'block';
       }
 

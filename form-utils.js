@@ -579,12 +579,11 @@ const ACOES_VEICULO = [
  * @param {object} opts
  * @param {string}   opts.containerId   - ID do elemento onde renderizar
  * @param {string}   opts.hiddenInputId - ID do hidden input que receberá o JSON
- * @param {boolean}  opts.servicoObrig  - se true, Tipo de Serviço é obrigatório
  * @param {object[]} opts.veiculos      - lista de veículos processados
- * @param {boolean}  [opts.exigirFoto]  - se true, exige ao menos 1 foto por veículo
+ * @param {boolean}  [opts.exigirFoto]  - se true, exige ao menos 1 foto por veículo (exceto Fora de Serviço)
  */
 function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigirFoto = false, idMap = null }) {
-  // Tipo de Serviço e Comentário sempre obrigatórios
+  // Status, Ação e (condicionalmente) Foto são obrigatórios — Observação é livre
   const container   = document.getElementById(containerId);
   const hiddenInput = document.getElementById(hiddenInputId);
   if (!container) return;
@@ -606,7 +605,7 @@ function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigi
       placa:   v.placa,
       status:  v.status || v.etapaOriginal,
       entrega: v.entrega,
-      servico: v.servico || '',
+      observacao: v.observacao || '',
       acao:    v.acao || '',
       fotos:   (v.fotos || []).map(f => ({ base64: f.base64, mime: f.mime, nome: f.nome })),
     })));
@@ -633,7 +632,7 @@ function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigi
               <th style="${estiloTh}white-space:nowrap;">Placa</th>
               <th style="${estiloTh}">Status <span style="color:#ffd">*</span></th>
               <th style="${estiloTh}">Entrega</th>
-              <th style="${estiloTh}">Serviço <span style="color:#ffd">*</span></th>
+              <th style="${estiloTh}">Observação</th>
               <th style="${estiloTh}min-width:210px;">Ação <span style="color:#ffd">*</span></th>
               <th style="${estiloTh}width:120px;text-align:center;">Fotos (máx. ${limiteFotos}) ${exigirFoto ? '<span style="color:#ffd">*</span>' : ''}</th>
             </tr>
@@ -666,12 +665,9 @@ function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigi
                     style="font-size:.78rem;padding:4px 2px;border:1px solid #ccc;border-radius:5px;width:100%;min-width:110px;box-sizing:border-box;">
                 </td>
                 <td style="${estiloTd}">
-                  <select data-idx="${idx}" data-field="servico"
-                    style="font-size:.78rem;padding:4px 2px;border:1px solid #ccc;border-radius:5px;width:100%;min-width:90px;background:#fff;">
-                    <option value="">—</option>
-                    ${['Preventiva','Corretiva','Sinistro']
-                      .map(s => `<option value="${s}" ${v.servico === s ? 'selected' : ''}>${s}</option>`).join('')}
-                  </select>
+                  <input type="text" data-idx="${idx}" data-field="observacao"
+                    value="${(v.observacao || '').replace(/"/g, '&quot;')}" placeholder="Opcional"
+                    style="font-size:.78rem;padding:4px 6px;border:1px solid #ccc;border-radius:5px;width:100%;min-width:110px;box-sizing:border-box;">
                 </td>
                 <td style="${estiloTd}">
                   <select data-idx="${idx}" data-field="acao"
@@ -776,14 +772,16 @@ function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigi
   container._validarTodos = () => {
     let valido = true;
     const erros = [];
+    // Fora de Serviço = carro ainda não está fisicamente na oficina, então
+    // não faz sentido exigir foto dele.
+    const precisaFoto = v => exigirFoto && v.status !== 'Fora de Serviço';
     estado.forEach((v, idx) => {
       if (!v.status) { erros.push(`Veículo ${idx+1} (${v.placa}): Status obrigatório.`); valido = false; }
-      if (!v.servico) { erros.push(`Veículo ${idx+1} (${v.placa}): Tipo de Serviço obrigatório.`); valido = false; }
       if (!v.acao) { erros.push(`Veículo ${idx+1} (${v.placa}): Ação obrigatória.`); valido = false; }
-      if (exigirFoto && (!v.fotos || v.fotos.length === 0)) { erros.push(`Veículo ${idx+1} (${v.placa}): Foto obrigatória.`); valido = false; }
+      if (precisaFoto(v) && (!v.fotos || v.fotos.length === 0)) { erros.push(`Veículo ${idx+1} (${v.placa}): Foto obrigatória.`); valido = false; }
     });
     if (!valido) {
-      const idxErro = estado.findIndex(v => !v.status || !v.servico || !v.acao || (exigirFoto && (!v.fotos || v.fotos.length === 0)));
+      const idxErro = estado.findIndex(v => !v.status || !v.acao || (precisaFoto(v) && (!v.fotos || v.fotos.length === 0)));
       if (idxErro >= 0) { paginaAtual = Math.floor(idxErro / POR_PAGINA); renderizar(); }
       alert('Corrija os campos antes de enviar:\n\n' + erros.slice(0,3).join('\n') + (erros.length > 3 ? `\n...e mais ${erros.length-3} erro(s).` : ''));
     }
@@ -964,21 +962,3 @@ function mostrarStatus(el, msg, tipo) {
 }
 
 // ── Validação do card de improdutivos (modo SAC) ─────────────────────────────
-/**
- * Valida se todos os selects de serviço obrigatórios estão preenchidos na tabela SAC.
- * Retorna true se válido, false se não.
- */
-function validarTabelaImprodutivos() {
-  const selects = document.querySelectorAll('[data-field="servico"][data-servico-obrig="true"]');
-  let valido = true;
-  selects.forEach(sel => {
-    if (!sel.value) {
-      sel.style.border = '2px solid red';
-      valido = false;
-    } else {
-      sel.style.border = '';
-    }
-  });
-  if (!valido) alert('Por favor, selecione o Tipo de Serviço para todos os veículos obrigatórios.');
-  return valido;
-}
