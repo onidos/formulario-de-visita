@@ -5,7 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro Enviado</title>
   <link rel="stylesheet" href="style.css">
+  <script src="form-utils.js"></script>
   <style>
+    .retry-box {
+      background: #fff9e6;
+      border: 1.5px solid #f0d080;
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      margin: 4px 0 20px;
+      text-align: center;
+    }
+    .retry-box p {
+      margin: 0 0 12px;
+      font-size: .88rem;
+      color: #7a5a00;
+    }
+    .retry-btn {
+      background: #0051AA;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+    .retry-btn:disabled { opacity: .6; cursor: default; }
     .status-cards {
       display: flex;
       flex-direction: column;
@@ -117,50 +143,23 @@
       const loading = document.getElementById('loading');
       const novoBtn = document.getElementById('novo-btn');
 
-      // Lê o resultado salvo pelo form-utils.js (via AppStorage / sessionStorage)
-      const _key = (k) => `visita_oficina__${k}`;
-      let resultado = { planilha: 'desconhecido', email: 'desconhecido' };
-      try {
-        const raw = sessionStorage.getItem(_key('submit_result'));
-        if (raw) resultado = JSON.parse(raw);
-        sessionStorage.removeItem(_key('submit_result'));
-      } catch (_) {}
-
-      const { planilha, email, erro } = resultado;
-
-      // ── Determina o ícone/título geral ──────────────────────
-      const tudoOk      = planilha === 'ok' && email === 'ok';
-      const planilhaOk  = planilha === 'ok';
-
-      const tituloIcon  = tudoOk ? '✅' : planilhaOk ? '⚠️' : '❌';
-      const tituloTexto = tudoOk
-        ? 'Registro enviado com sucesso!'
-        : planilhaOk
-          ? 'Registro salvo, mas com aviso'
-          : 'Algo deu errado';
-
-      const subtexto = tudoOk
-        ? 'Planilha atualizada e e-mail enviado para a equipe.'
-        : planilhaOk
-          ? 'O registro foi salvo na planilha, mas houve um problema com o e-mail.'
-          : 'Não foi possível confirmar o salvamento do registro.';
-
-      // ── Card de planilha ────────────────────────────────────
       const infoPlanilha = {
         ok:          { cls: 'ok',          icon: '📊', msg: 'Registro salvo na planilha' },
-        erro:        { cls: 'erro',        icon: '📊', msg: 'Falha ao salvar na planilha', hint: 'Verifique as permissões do Google Apps Script.' },
-        desconhecido:{ cls: 'desconhecido',icon: '📊', msg: 'Não foi possível confirmar o salvamento', hint: 'O registro pode ter sido salvo normalmente.' },
+        erro:        { cls: 'erro',        icon: '📊', msg: 'Falha ao salvar na planilha' },
+        desconhecido:{ cls: 'desconhecido',icon: '📊', msg: 'Não foi possível confirmar o salvamento' },
       };
-
-      // ── Card de e-mail ──────────────────────────────────────
       const infoEmail = {
         ok:          { cls: 'ok',          icon: '📧', msg: 'E-mail enviado para a equipe' },
-        erro:        { cls: 'erro',        icon: '📧', msg: 'Falha ao enviar o e-mail', hint: 'Verifique as permissões de MailApp no Apps Script.' },
-        desconhecido:{ cls: 'desconhecido',icon: '📧', msg: 'Não foi possível confirmar o envio do e-mail', hint: 'O e-mail pode ter sido enviado normalmente.' },
+        processando: { cls: 'desconhecido',icon: '📧', msg: 'E-mail sendo enviado', hint: 'Chega em alguns minutos.' },
+        erro:        { cls: 'erro',        icon: '📧', msg: 'Falha ao enviar o e-mail', hint: 'Será reenviado automaticamente quando a cota liberar.' },
+        desconhecido:{ cls: 'desconhecido',icon: '📧', msg: 'Não foi possível confirmar o envio do e-mail' },
       };
-
-      const ip = infoPlanilha[planilha] || infoPlanilha.desconhecido;
-      const ie = infoEmail[email]       || infoEmail.desconhecido;
+      const infoPdf = {
+        ok:          { cls: 'ok',          icon: '📄', msg: 'Laudo em PDF gerado' },
+        processando: { cls: 'desconhecido',icon: '📄', msg: 'Laudo sendo gerado', hint: 'Chega em alguns minutos.' },
+        erro:        { cls: 'erro',        icon: '📄', msg: 'Falha ao gerar o laudo em PDF' },
+        desconhecido:{ cls: 'desconhecido',icon: '📄', msg: 'Não foi possível confirmar o laudo em PDF' },
+      };
 
       function renderCard(info) {
         return `
@@ -173,22 +172,77 @@
           </div>`;
       }
 
-      // ── Monta o HTML ────────────────────────────────────────
-      loading.remove();
-      card.innerHTML = `
-        <div style="text-align:center; margin-bottom:8px; font-size:2.2rem;">${tituloIcon}</div>
-        <h2 class="success-title">${tituloTexto}</h2>
-        <p class="success-sub">${subtexto}</p>
-        <div class="status-cards">
-          ${renderCard(ip)}
-          ${renderCard(ie)}
-        </div>
-        ${erro ? `<p style="font-size:.78rem;color:var(--text-muted);text-align:center;margin-top:4px;">Detalhe técnico: ${erro}</p>` : ''}
-      `;
+      function renderizar(resultado) {
+        const { planilha, email, pdf, erro } = resultado;
+        const confirmado = resultado.confirmado !== false; // undefined = compatibilidade com formato antigo
+        const backup     = LocalBackup.obter();
+        const pendente    = !!backup;
 
-      novoBtn.style.display = 'block';
+        const planilhaOk      = planilha === 'ok';
+        const aindaProcessando = email === 'processando' || pdf === 'processando';
+
+        const tituloIcon  = !confirmado ? '⏳' : planilhaOk ? '✅' : '❌';
+        const tituloTexto = !confirmado
+          ? 'Envio não confirmado'
+          : planilhaOk ? 'Registro enviado com sucesso!' : 'Algo deu errado';
+
+        const subtexto = !confirmado
+          ? 'Não conseguimos confirmar se os dados chegaram ao servidor.'
+          : planilhaOk
+            ? (aindaProcessando
+                ? 'Dados salvos na planilha. Fotos, laudo em PDF e e-mail estão sendo processados — chegam em alguns minutos.'
+                : 'Planilha atualizada, e-mail enviado e laudo gerado.')
+            : 'Não foi possível confirmar o salvamento do registro.';
+
+        const ip   = infoPlanilha[planilha] || infoPlanilha.desconhecido;
+        const ie   = infoEmail[email]       || infoEmail.desconhecido;
+        const ipdf = pdf ? (infoPdf[pdf] || infoPdf.desconhecido) : null;
+
+        let retryBox = '';
+        if (pendente) {
+          const detalhe = backup.nomeOficina ? ` — ${backup.nomeOficina}` : '';
+          retryBox = `
+            <div class="retry-box">
+              <p>Visita${detalhe} ainda não confirmada. Seus dados continuam salvos neste aparelho — é seguro tentar novamente.</p>
+              <button type="button" class="retry-btn" id="retry-btn">🔄 Tentar novamente</button>
+            </div>`;
+        }
+
+        card.innerHTML = `
+          <div style="text-align:center; margin-bottom:8px; font-size:2.2rem;">${tituloIcon}</div>
+          <h2 class="success-title">${tituloTexto}</h2>
+          <p class="success-sub">${subtexto}</p>
+          ${retryBox}
+          <div class="status-cards">
+            ${renderCard(ip)}
+            ${renderCard(ie)}
+            ${ipdf ? renderCard(ipdf) : ''}
+          </div>
+          ${erro ? `<p style="font-size:.78rem;color:var(--text-muted);text-align:center;margin-top:4px;">Detalhe técnico: ${erro}</p>` : ''}
+        `;
+
+        const retryBtn = document.getElementById('retry-btn');
+        if (retryBtn) {
+          retryBtn.addEventListener('click', async () => {
+            retryBtn.disabled = true;
+            retryBtn.textContent = 'Reenviando…';
+            const novoResultado = await tentarReenviarBackup();
+            AppStorage.set('submit_result', novoResultado);
+            renderizar(novoResultado);
+          });
+        }
+
+        novoBtn.style.display = pendente ? 'none' : 'block';
+      }
+
+      const resultado = AppStorage.get('submit_result') || { planilha: 'desconhecido', email: 'desconhecido', pdf: 'desconhecido', confirmado: false };
+      AppStorage.remove('submit_result');
+
+      loading.remove();
+      renderizar(resultado);
+
       novoBtn.addEventListener('click', () => {
-        sessionStorage.removeItem(_key('tipo_oficina'));
+        AppStorage.remove('tipo_oficina');
         window.location.href = 'index_visita_oficina.html';
       });
     });

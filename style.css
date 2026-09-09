@@ -68,6 +68,14 @@ body {
   }
 }
 
+/* Telas de computador: caixa mais larga, para a tabela de veículos caber sem cortar */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1000px;
+    width: min(90vw, 1000px);
+  }
+}
+
 .container::before {
   content: '';
   position: absolute;

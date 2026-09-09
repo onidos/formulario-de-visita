@@ -11,6 +11,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   engine.init();
 
+  // Popula os selects de "Ação" do modo manual com a mesma lista usada na
+  // tabela SAC (ACOES_VEICULO, definida em form-utils.js) — evita manter a
+  // lista duplicada em vários lugares.
+  [1, 2, 3].forEach(n => {
+    const sel = document.getElementById(`acao${n}`);
+    if (!sel) return;
+    ACOES_VEICULO.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a;
+      opt.textContent = a;
+      sel.appendChild(opt);
+    });
+  });
+
   preencherDataHora(
     document.getElementById('data-visita'),
     document.getElementById('horario-visita')
@@ -46,7 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', (e) => {
       e.stopImmediatePropagation();
       const resposta = btn.dataset.value;
-      engine.showCard(isProspeccao() ? '5' : (resposta === 'Sim' ? '5' : '9b-alt'));
+      const destino = isProspeccao() ? '5' : (resposta === 'Sim' ? '5' : '9b-alt');
+      document.getElementById('visita-completa-hidden').value = (destino === '5') ? 'Sim' : 'Nao';
+      engine.showCard(destino);
     }, true);
   });
 
@@ -61,18 +77,23 @@ document.addEventListener('DOMContentLoaded', () => {
     engine.showCard('9-alt');
   });
 
+  // Usado tanto na importação inicial (preenche os totais a partir do XLSX)
+  // quanto depois, na tabela de veículos, pra manter as contagens
+  // sincronizadas conforme o analista edita o status de cada placa.
+  const idMapContagemVeiculos = {
+    total:     'veiculos-manutencao',
+    fs:        'veiculos-fs',
+    aprovacao: 'veiculos-aprovacao',
+    servico:   'veiculos-servico',
+    pecas:     'veiculos-pecas',
+    orcamento: 'veiculos-orcamento',
+  };
+
   inicializarImportSACVolume({
     btnId:    'btn-import-sac-vol',
     inputId:  'input-import-sac-vol',
     statusId: 'import-sac-vol-status',
-    idMap: {
-      total:     'veiculos-manutencao',
-      fs:        'veiculos-fs',
-      aprovacao: 'veiculos-aprovacao',
-      servico:   'veiculos-servico',
-      pecas:     'veiculos-pecas',
-      orcamento: 'veiculos-orcamento',
-    },
+    idMap: idMapContagemVeiculos,
     onImportado: (dados) => {
       atualizarPrevFornecedores();
       const statusEl = document.getElementById('import-sac-vol-status');
@@ -110,6 +131,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!tabelaContainer._validarTodos()) return;
       } else {
         if (!validarCard(card)) { engine._shakeCard(card); alert('Por favor, preencha todos os campos obrigatórios.'); return; }
+
+        // Modo manual: exige foto de cada veículo preenchido (só em visitas presenciais)
+        if (isPresencial()) {
+          const veiculosAtivos = [1, 2, 3].filter(n => {
+            const placaInput = form.querySelector(`[name="placa${n}"]`);
+            return placaInput && !placaInput.disabled && placaInput.value.trim();
+          });
+          const semFoto = veiculosAtivos.find(n => fotosManuais[n].length === 0);
+          if (semFoto) {
+            alert(`Por favor, adicione uma foto do Veículo ${semFoto} (obrigatória para visitas presenciais).`);
+            return;
+          }
+        }
+
+        coletarAcoesManual();
       }
 
       enviarFormulario(form, btn);
@@ -121,6 +157,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Validações ────────────────────────────────────────────
   function validacaoEspecifica(card) {
     const cardId = card.id.replace('card-', '');
+
+    // Card 2: foto da fachada obrigatória apenas em visitas presenciais
+    if (cardId === '2') {
+      if (isPresencial() && fotosManuais.fachada.length === 0) {
+        alert('Por favor, adicione uma foto da fachada da oficina (obrigatória para visitas presenciais).');
+        return false;
+      }
+    }
 
     // Card 9-alt: se total = 0 pula direto para fornecedores
     if (cardId === '9-alt') {
@@ -186,7 +230,131 @@ document.addEventListener('DOMContentLoaded', () => {
     cb.addEventListener('change', () => toggleVeiculo(cb.dataset.target, cb.checked));
   });
 
+  // ── Fotos dos veículos manuais (múltiplas por veículo) ────
+  const fotosManuais = { 1: [], 2: [], 3: [], fachada: [] };
+
+  function renderizarFotosManuais(n) {
+    const container = document.getElementById(`fotos-preview-${n}`);
+    if (!container) return;
+    container.innerHTML = fotosManuais[n].map((f, i) => `
+      <div style="position:relative;display:inline-block;flex-shrink:0;">
+        <img src="data:${f.mime};base64,${f.base64}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #dde3ee;">
+        <button type="button" class="foto-manual-remover-btn" data-target="${n}" data-fotoidx="${i}" title="Remover"
+          style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;line-height:18px;border-radius:50%;border:none;background:#c0392b;color:#fff;font-size:.7rem;cursor:pointer;padding:0;">✕</button>
+      </div>
+    `).join('');
+    container.querySelectorAll('.foto-manual-remover-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        fotosManuais[n].splice(parseInt(btn.dataset.fotoidx), 1);
+        atualizarHiddenFotos(n);
+        renderizarFotosManuais(n);
+        atualizarBotoesFoto(n);
+      });
+    });
+    atualizarBotoesFoto(n);
+  }
+
+  function atualizarBotoesFoto(n) {
+    const atingiuLimite = fotosManuais[n].length >= MAX_FOTOS_POR_VEICULO;
+    document.querySelectorAll(`.foto-manual-camera-btn[data-target="${n}"], .foto-manual-galeria-btn[data-target="${n}"]`)
+      .forEach(btn => { btn.style.display = atingiuLimite ? 'none' : ''; });
+  }
+
+  function atualizarHiddenFotos(n) {
+    const hidden = form.querySelector(`[name="fotos${n}"]`);
+    if (hidden) hidden.value = JSON.stringify(fotosManuais[n]);
+  }
+
+  function salvarFotoManual(n, dados) {
+    if (fotosManuais[n].length >= MAX_FOTOS_POR_VEICULO) {
+      alert(`Máximo de ${MAX_FOTOS_POR_VEICULO} fotos por veículo.`);
+      return;
+    }
+    fotosManuais[n].push(dados);
+    atualizarHiddenFotos(n);
+    renderizarFotosManuais(n);
+  }
+  const erroFotoManual = (msg) => alert('Erro ao processar a foto: ' + msg);
+
+  document.querySelectorAll('.foto-manual-camera-btn').forEach(btn => {
+    ativarCapturaFoto(btn, (dados) => salvarFotoManual(btn.dataset.target, dados), erroFotoManual, { capture: 'environment' });
+  });
+  document.querySelectorAll('.foto-manual-galeria-btn').forEach(btn => {
+    ativarCapturaFoto(btn, (dados) => salvarFotoManual(btn.dataset.target, dados), erroFotoManual);
+  });
+
+  // ── Scanner de placa (câmera dedicada, ao lado do campo) ──
+  // A foto tirada aqui também é salva como foto do veículo (junto com as
+  // demais), mesmo que o OCR não consiga ler a placa — o analista não
+  // precisa tirar a mesma foto de novo depois.
+  async function lerPlacaEPreencher(n, dados) {
+    salvarFotoManual(n, dados);
+
+    const statusEl = document.getElementById(`ocr-status-${n}`);
+    if (statusEl) statusEl.textContent = '🔎 Lendo a placa na foto…';
+    const placa = await tentarLerPlaca(dados.base64, dados.mime);
+    if (!statusEl) return;
+    if (placa) {
+      const placaInput = form.querySelector(`[name="placa${n}"]`);
+      if (placaInput) {
+        placaInput.value = placa;
+        placaInput.style.background = '#fff9e0';
+        setTimeout(() => { placaInput.style.background = ''; }, 4000);
+      }
+      statusEl.textContent = `🔎 Placa lida: ${placa} — confira antes de enviar.`;
+    } else {
+      statusEl.textContent = '⚠️ Não foi possível ler a placa. Digite manualmente.';
+    }
+  }
+
+  document.querySelectorAll('.scan-placa-btn').forEach(btn => {
+    ativarCapturaFoto(btn,
+      (dados) => lerPlacaEPreencher(btn.dataset.target, dados),
+      (msg) => alert('Erro ao processar a foto: ' + msg),
+      { capture: 'environment' }
+    );
+  });
+
+  function limparFotoManual(n) {
+    fotosManuais[n] = [];
+    atualizarHiddenFotos(n);
+    renderizarFotosManuais(n);
+  }
+
+  // Monta um array com a ação de cada veículo preenchido no modo manual e
+  // salva num único campo oculto (uma célula só na planilha) — mesmo padrão
+  // já usado pro veiculos_json do modo SAC.
+  function coletarAcoesManual() {
+    const acoes = [];
+    [1, 2, 3].forEach(n => {
+      const placaInput = form.querySelector(`[name="placa${n}"]`);
+      const acaoSelect = document.getElementById(`acao${n}`);
+      if (!placaInput || placaInput.disabled || !placaInput.value.trim()) return;
+      if (!acaoSelect || !acaoSelect.value) return;
+      acoes.push({ placa: placaInput.value.trim(), acao: acaoSelect.value });
+    });
+    const hidden = document.getElementById('acoes-manual-json');
+    if (hidden) hidden.value = JSON.stringify(acoes);
+  }
+
   // ── Tabela de improdutivos (card 17-alt) ──────────────────
+  function obterVeiculosParaTabela(dadosImportados) {
+    // Se a tabela já foi preenchida antes (analista navegou pra outro card
+    // e voltou), restaura o estado atual do hidden — senão TODOS os campos
+    // (status, serviço, ação, fotos) seriam perdidos a cada ida e volta.
+    const hiddenAtual = document.getElementById('veiculos-json')?.value;
+    if (hiddenAtual) {
+      try {
+        const restaurado = JSON.parse(hiddenAtual);
+        if (Array.isArray(restaurado) && restaurado.length) return restaurado;
+      } catch (err) { /* segue com o import original */ }
+    }
+    // Primeira vez que a tabela é montada nesta visita: mantém tudo do
+    // import, mas zera o status pra obrigar o analista a revisar e
+    // escolher ativamente (em vez de aceitar sem olhar o valor importado).
+    return dadosImportados.veiculos.map(v => ({ ...v, status: '' }));
+  }
+
   function renderizarImprodutivos() {
     const dados      = AppStorage.get('sac_dados');
     const modoSAC    = document.getElementById('modo-sac');
@@ -198,14 +366,16 @@ document.addEventListener('DOMContentLoaded', () => {
       if (modoManual) modoManual.style.display  = 'none';
 
       if (aviso) {
-        aviso.textContent = '⚠️ Tipo de Serviço e Comentário são obrigatórios para todos os veículos.';
+        aviso.textContent = '⚠️ Status, Tipo de Serviço e Ação são obrigatórios para todos os veículos.';
         aviso.style.display = 'block';
       }
 
       inicializarTabelaVeiculos({
         containerId:   'tabela-improdutivos',
         hiddenInputId: 'veiculos-json',
-        veiculos:      dados.veiculos,
+        veiculos:      obterVeiculosParaTabela(dados),
+        exigirFoto:    isPresencial(),
+        idMap:         idMapContagemVeiculos,
       });
     } else {
       if (modoSAC)    modoSAC.style.display    = 'none';
@@ -217,15 +387,18 @@ document.addEventListener('DOMContentLoaded', () => {
   function toggleVeiculo(n, desabilitar) {
     const body  = document.getElementById(`veiculo-body-${n}`);
     const placa = document.querySelector(`[name="placa${n}"]`);
+    const scanBtn = document.querySelector(`.scan-placa-btn[data-target="${n}"]`);
     const card  = document.getElementById(`veiculo-card-${n}`);
     if (!body || !placa) return;
     placa.disabled = desabilitar;
+    if (scanBtn) scanBtn.disabled = desabilitar;
     if (desabilitar) placa.value = '';
     body.style.display = desabilitar ? 'none' : 'block';
     body.querySelectorAll('input, select').forEach(el => {
       el.disabled = desabilitar;
       if (desabilitar) el.value = '';
     });
+    if (desabilitar) limparFotoManual(n);
     card?.classList.toggle('vehicle-card--disabled', desabilitar);
   }
 
@@ -233,5 +406,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const sel = document.getElementById('motivo');
     if (!sel) return false;
     return Array.from(sel.selectedOptions).some(o => o.value === 'Prospecção');
+  }
+
+  function isPresencial() {
+    return document.getElementById('presencial-telefone')?.value === 'Presencial';
   }
 });

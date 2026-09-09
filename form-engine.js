@@ -22,12 +22,12 @@ class FormEngine {
   }
 
   init() {
+    if (!this._carregarTipoOficina()) return; // página sendo redirecionada ao início
     this._mostrarPrimeiroCard();
     this._bindNextButtons();
     this._bindPrevButtons();
     this._bindSimNaoButtons();
     this._bindEnterKey();
-    this._carregarTipoOficina();
   }
 
   // ── Exibição ──────────────────────────────────────────────────────────────
@@ -149,7 +149,15 @@ class FormEngine {
   _carregarTipoOficina() {
     const tipo = AppStorage.get('tipo_oficina');
     const hidden = this.form.querySelector('#tipo-oficina-hidden');
-    if (tipo && hidden) hidden.value = tipo;
+    if (tipo && hidden) {
+      hidden.value = tipo;
+      return true;
+    }
+    // Página aberta diretamente (link salvo, atalho, QR code etc.), sem passar
+    // pela tela inicial — sem isso, o tipo de oficina fica vazio na planilha
+    // e a checagem de horário (7:30–18:30) também é pulada. Volta ao início.
+    window.location.href = 'index_visita_oficina.html';
+    return false;
   }
 
   _shakeCard(card) {
