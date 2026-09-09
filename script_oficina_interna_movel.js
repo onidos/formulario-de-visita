@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (modoManual) modoManual.style.display  = 'none';
 
       if (aviso) {
-        aviso.textContent = '⚠️ Status, Tipo de Serviço e Ação são obrigatórios para todos os veículos. Foto é obrigatória em visitas presenciais, exceto para veículos "Fora de Serviço".';
+        aviso.textContent = '⚠️ Status e Ação são obrigatórios para todos os veículos. Foto é obrigatória em visitas presenciais, exceto para veículos "Fora de Serviço".';
         aviso.style.display = 'block';
       }
 
