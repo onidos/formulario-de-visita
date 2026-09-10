@@ -44,8 +44,16 @@ class FormEngine {
     const first = target.querySelector('input:not([type="hidden"]):not([disabled]), select, textarea');
     if (first) setTimeout(() => first.focus(), 50);
 
+    // Hook opcional: chamado toda vez que um card é exibido (next/prev/sim-nao
+    // ou showCard direto) — usado pelo autosave de rascunho, entre outras coisas.
+    // Roda ANTES do scroll (abaixo) de propósito: scroll é só cosmético, não
+    // pode nunca impedir o autosave de disparar se por algum motivo falhar.
+    this.options.onCardChange?.(cardId);
+
     // Scroll suave ao topo do container
-    this.form.closest('.container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    try {
+      this.form.closest('.container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (errScroll) { /* nunca deixa isso quebrar a navegação */ }
   }
 
   currentCard() {

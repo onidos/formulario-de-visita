@@ -3,26 +3,57 @@
  * Depende de: form-utils.js, form-engine.js
  */
 
+// ── Configuração: permitir "Preenchimento Manual"? ──────────────
+// false = esconde o botão "Preenchimento Manual" na tela de escolha,
+// deixando só "Importar Placas do Portal" disponível. Pra reativar o modo
+// manual, é só voltar isso pra true — não precisa mexer em mais nada.
+const PERMITIR_MODO_MANUAL = false;
+
 document.addEventListener('DOMContentLoaded', () => {
   const form   = document.getElementById('agendamento-form');
   const engine = new FormEngine(form, {
     onBeforeNext:   validacaoEspecifica,
     onBeforeSimNao: validacaoSimNaoEspecifica,
+    onCardChange:   (cardId) => salvarRascunho(cardId),
   });
   engine.init();
 
-  // Popula os selects de "Ação" do modo manual com a mesma lista usada na
-  // tabela SAC (ACOES_VEICULO, definida em form-utils.js) — evita manter a
-  // lista duplicada em vários lugares.
-  [1, 2, 3].forEach(n => {
+  if (!PERMITIR_MODO_MANUAL) {
+    const btnManual = document.getElementById('btn-modo-manual');
+    if (btnManual) btnManual.style.display = 'none';
+  }
+
+  // Popula os selects de "Ação" do modo manual com a lista permitida pro
+  // status atual daquele veículo (mesma regra da tabela SAC — algumas ações
+  // só valem pra um status específico, ex: "Fora de Serviço").
+  function popularAcoesManual(n, manterSelecionado) {
     const sel = document.getElementById(`acao${n}`);
+    const statusSel = form.querySelector(`[name="status${n}"]`);
     if (!sel) return;
-    ACOES_VEICULO.forEach(a => {
+    const statusAtual = statusSel?.value || '';
+    const valorAnterior = manterSelecionado ? sel.value : '';
+
+    sel.innerHTML = '';
+    const optVazia = document.createElement('option');
+    optVazia.value = '';
+    optVazia.textContent = 'Selecione';
+    sel.appendChild(optVazia);
+
+    acoesDisponiveisParaStatus(statusAtual).forEach(a => {
       const opt = document.createElement('option');
       opt.value = a;
       opt.textContent = a;
       sel.appendChild(opt);
     });
+
+    // Só mantém a seleção anterior se ela ainda for uma opção válida pro
+    // status atual — senão volta pra "Selecione" (evita ação escondida).
+    sel.value = Array.from(sel.options).some(o => o.value === valorAnterior) ? valorAnterior : '';
+  }
+
+  [1, 2, 3].forEach(n => {
+    popularAcoesManual(n, false);
+    form.querySelector(`[name="status${n}"]`)?.addEventListener('change', () => popularAcoesManual(n, true));
   });
 
   preencherDataHora(
@@ -271,6 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
         atualizarHiddenFotos(n);
         renderizarFotosManuais(n);
         atualizarBotoesFoto(n);
+        salvarRascunho(cardIdAtual());
       });
     });
     atualizarBotoesFoto(n);
@@ -295,6 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fotosManuais[n].push(dados);
     atualizarHiddenFotos(n);
     renderizarFotosManuais(n);
+    salvarRascunho(cardIdAtual());
   }
   const erroFotoManual = (msg) => alert('Erro ao processar a foto: ' + msg);
 
@@ -387,17 +420,26 @@ document.addEventListener('DOMContentLoaded', () => {
       if (modoSAC)    modoSAC.style.display    = 'block';
       if (modoManual) modoManual.style.display  = 'none';
 
+      const veiculosParaTabela = obterVeiculosParaTabela(dados);
+      const totalVeiculos = veiculosParaTabela.length;
+      // Com mais de 25 placas, foto por veículo deixa de ser obrigatória —
+      // só a foto da fachada continua exigida em visita presencial.
+      const fotoObrigatoriaPorVeiculo = isPresencial() && totalVeiculos <= 25;
+
       if (aviso) {
-        aviso.textContent = '⚠️ Status e Ação são obrigatórios para todos os veículos. Foto é obrigatória em visitas presenciais, exceto para veículos "Fora de Serviço".';
+        aviso.textContent = totalVeiculos > 25
+          ? '⚠️ Status, Dt. Prev. Entrega e Ação são obrigatórios para todos os veículos. Com mais de 25 placas, a foto por veículo NÃO é obrigatória — só a foto da fachada continua exigida.'
+          : '⚠️ Status, Dt. Prev. Entrega e Ação são obrigatórios para todos os veículos. Foto é obrigatória em visitas presenciais, exceto para veículos "Fora de Serviço".';
         aviso.style.display = 'block';
       }
 
       inicializarTabelaVeiculos({
         containerId:   'tabela-improdutivos',
         hiddenInputId: 'veiculos-json',
-        veiculos:      obterVeiculosParaTabela(dados),
-        exigirFoto:    isPresencial(),
+        veiculos:      veiculosParaTabela,
+        exigirFoto:    fotoObrigatoriaPorVeiculo,
         idMap:         idMapContagemVeiculos,
+        onChange:      () => salvarRascunho('18'),
       });
     } else {
       if (modoSAC)    modoSAC.style.display    = 'none';
@@ -433,4 +475,74 @@ document.addEventListener('DOMContentLoaded', () => {
   function isPresencial() {
     return document.getElementById('presencial-telefone')?.value === 'Presencial';
   }
+
+  function cardIdAtual() {
+    return engine.currentCard()?.id.replace('card-', '') || '';
+  }
+
+  // ============================================================
+  //  Rascunho automático — protege contra tela travando, app indo pra
+  //  segundo plano por muito tempo, ou voltar sem querer no celular.
+  //  Salva a cada troca de card e a cada foto adicionada; restaura sozinho
+  //  na abertura da página, se achar um rascunho da mesma oficina com
+  //  menos de 24h.
+  // ============================================================
+  function salvarRascunho(cardId) {
+    RascunhoVisita.salvar({
+      tipoOficina: AppStorage.get('tipo_oficina') || '',
+      cardAtual:   cardId,
+      valores:     coletarValoresForm(form),
+    });
+  }
+
+  function mostrarAvisoRascunhoRestaurado() {
+    const aviso = document.createElement('div');
+    aviso.textContent = '✅ Seu progresso anterior foi restaurado automaticamente.';
+    aviso.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);background:#0051AA;color:#fff;padding:10px 18px;border-radius:8px;font-size:.85rem;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.2);max-width:92%;text-align:center;';
+    document.body.appendChild(aviso);
+    setTimeout(() => aviso.remove(), 5000);
+  }
+
+  function restaurarRascunhoSeExistir() {
+    const tipoOficina = AppStorage.get('tipo_oficina') || '';
+    const rascunho = RascunhoVisita.obter(tipoOficina);
+    if (!rascunho || !rascunho.valores) return;
+
+    restaurarValoresForm(form, rascunho.valores);
+
+    // Reconstrói fotosManuais (1/2/3/fachada) a partir dos hidden
+    // restaurados, pra manter as miniaturas e os próximos "adicionar foto"
+    // consistentes com o que já tinha sido salvo.
+    ['1', '2', '3', 'fachada'].forEach(n => {
+      const nomeCampo = n === 'fachada' ? 'fotosfachada' : `fotos${n}`;
+      const hidden = form.querySelector(`[name="${nomeCampo}"]`);
+      if (!hidden || !hidden.value) return;
+      try {
+        const lista = JSON.parse(hidden.value);
+        if (Array.isArray(lista) && lista.length) {
+          fotosManuais[n] = lista;
+          renderizarFotosManuais(n);
+        }
+      } catch (err) {}
+    });
+
+    // Se havia uma tabela SAC preenchida, garante que "sac_dados" também
+    // reflita isso — renderizarImprodutivos() usa esse dado (sessionStorage)
+    // pra decidir se mostra a tabela, e ele pode não ter sobrevivido à mesma
+    // interrupção que este rascunho (localStorage) está protegendo.
+    const veiculosJsonRestaurado = rascunho.valores['entry.veiculos_json'];
+    if (veiculosJsonRestaurado && !AppStorage.get('sac_dados')) {
+      try {
+        const veiculos = JSON.parse(veiculosJsonRestaurado);
+        if (Array.isArray(veiculos) && veiculos.length) AppStorage.set('sac_dados', { veiculos });
+      } catch (err) {}
+    }
+
+    engine.showCard(rascunho.cardAtual);
+    if (rascunho.cardAtual === '18') renderizarImprodutivos();
+
+    mostrarAvisoRascunhoRestaurado();
+  }
+
+  restaurarRascunhoSeExistir();
 });
