@@ -7,7 +7,7 @@
 // false = esconde o botão "Preenchimento Manual" na tela de escolha,
 // deixando só "Importar Placas do Portal" disponível. Pra reativar o modo
 // manual, é só voltar isso pra true — não precisa mexer em mais nada.
-const PERMITIR_MODO_MANUAL = false;
+const PERMITIR_MODO_MANUAL = true;
 
 document.addEventListener('DOMContentLoaded', () => {
   const form   = document.getElementById('agendamento-form');
@@ -133,7 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
         statusEl.style.background = '#f0faf4';
         statusEl.style.border = '1px solid #a3d9b1';
         statusEl.style.color = '#1a5c30';
-        statusEl.textContent = `✅ ${dados.total} veículos importados. Avançando...`;
+        statusEl.textContent = dados.duplicatasRemovidas > 0
+          ? `✅ ${dados.total} veículos importados (${dados.duplicatasRemovidas} placa(s) duplicada(s) no arquivo foram ignoradas). Avançando...`
+          : `✅ ${dados.total} veículos importados. Avançando...`;
       }
       setTimeout(() => engine.showCard('16-alt'), 1200);
     },
