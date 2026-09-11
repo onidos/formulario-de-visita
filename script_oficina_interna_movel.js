@@ -99,11 +99,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Card 9b-alt: escolha de modo (importar ou manual) ────
   document.getElementById('btn-modo-importar')?.addEventListener('click', () => {
+    AppStorage.remove('modo_manual_ativo');
     document.getElementById('input-import-sac-vol')?.click();
   });
 
   document.getElementById('btn-modo-manual')?.addEventListener('click', () => {
+    // O Total (e o resto da "Quantidade de Veículos") ainda não foi
+    // preenchido aqui — essa tela vem DEPOIS (cards 9-alt a 15-alt). Só
+    // marca que o modo escolhido foi manual; a tabela em branco é gerada
+    // mais adiante (renderizarImprodutivos), quando o Total já estiver
+    // preenchido de verdade.
     AppStorage.remove('sac_dados');
+    AppStorage.set('modo_manual_ativo', true);
     atualizarPrevFornecedores();
     engine.showCard('9-alt');
   });
@@ -397,10 +404,25 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderizarImprodutivos() {
-    const dados      = AppStorage.get('sac_dados');
+    let dados        = AppStorage.get('sac_dados');
     const modoSAC    = document.getElementById('modo-sac');
     const modoManual = document.getElementById('modo-manual');
     const aviso      = document.getElementById('aviso-servico-obrig');
+
+    // Modo manual: até aqui só sabíamos QUE era manual (flag marcada no
+    // clique do botão) — agora, chegando neste ponto do fluxo, o Total já
+    // foi preenchido de verdade (cards 9-alt a 15-alt, logo antes de
+    // Fornecedores). Gera as linhas em branco agora, na quantidade certa.
+    if (!dados && AppStorage.get('modo_manual_ativo')) {
+      const total = parseInt(document.getElementById('veiculos-manutencao')?.value, 10) || 0;
+      if (total > 0) {
+        const veiculosVazios = Array.from({ length: total }, () => ({
+          origem: 'Manual', placa: '', status: '', entrega: '', observacao: '', acao: '', fotos: [],
+        }));
+        dados = { veiculos: veiculosVazios, manual: true };
+        AppStorage.set('sac_dados', dados);
+      }
+    }
 
     if (dados && dados.veiculos && dados.veiculos.length > 0) {
       if (modoSAC)    modoSAC.style.display    = 'block';
@@ -414,8 +436,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (aviso) {
         aviso.textContent = totalVeiculos > 25
-          ? '⚠️ Status, Dt. Prev. Entrega e Ação são obrigatórios para todos os veículos. Com mais de 25 placas, a foto por veículo NÃO é obrigatória — só a foto da fachada continua exigida.'
-          : '⚠️ Status, Dt. Prev. Entrega e Ação são obrigatórios para todos os veículos. Foto é obrigatória em visitas presenciais, exceto para veículos "Fora de Serviço".';
+          ? '⚠️ Placa, Status, Dt. Prev. Entrega e Ação são obrigatórios para todos os veículos. Com mais de 25 placas, a foto por veículo NÃO é obrigatória — só a foto da fachada continua exigida.'
+          : '⚠️ Placa, Status, Dt. Prev. Entrega e Ação são obrigatórios para todos os veículos. Foto é obrigatória em visitas presenciais, exceto para veículos "Fora de Serviço".';
         aviso.style.display = 'block';
       }
 
@@ -425,6 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
         veiculos:      veiculosParaTabela,
         exigirFoto:    fotoObrigatoriaPorVeiculo,
         idMap:         idMapContagemVeiculos,
+        placaEditavel: !!dados.manual,
         onChange:      () => salvarRascunho('17-alt'),
       });
     } else {

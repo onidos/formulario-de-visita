@@ -243,6 +243,8 @@
 
       novoBtn.addEventListener('click', () => {
         AppStorage.remove('tipo_oficina');
+        AppStorage.remove('sac_dados');
+        AppStorage.remove('modo_manual_ativo');
         window.location.href = 'index_visita_oficina.html';
       });
     });
