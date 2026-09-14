@@ -577,14 +577,28 @@ function processarArquivoSAC(file, { onSuccess, onError }) {
       });
 
       // Montar lista de veículos processados
-      const veiculos = ordenados.map(row => ({
+      const veiculosComDuplicatas = ordenados.map(row => ({
         placa:    String(row['Placa'] || '').trim(),
         veiculo:  String(row['Veículo'] || '').trim(),
         entrega:  formatarDataParaInput(String(row['Previsão Entrega'] || '')),
         etapaOriginal: String(row['Etapas do Processo'] || '').trim(),
         status:   mapearEtapaForm(String(row['Etapas do Processo'] || '')),
         parada:   String(row['Parada Veículo'] || '-').trim(),
+        origem:   'Planilha',
       }));
+
+      // Remove placas duplicadas do arquivo — mantém só a primeira ocorrência
+      // de cada placa (a lista já está ordenada pela mais antiga/mais
+      // improdutiva primeiro), pra não aparecer 2 linhas da mesma placa na
+      // tela final. Não deveria acontecer, mas o arquivo pode vir com erro.
+      const placasVistas = new Set();
+      const veiculos = veiculosComDuplicatas.filter(v => {
+        const chave = v.placa.trim().toUpperCase();
+        if (!chave || placasVistas.has(chave)) return false;
+        placasVistas.add(chave);
+        return true;
+      });
+      const duplicatasRemovidas = veiculosComDuplicatas.length - veiculos.length;
 
       // Contagens por status
       const contagem = { total: veiculos.length, orcamento: 0, fs: 0, servico: 0, pecas: 0, aprovacao: 0, outros: 0 };
@@ -601,7 +615,7 @@ function processarArquivoSAC(file, { onSuccess, onError }) {
         entrega: v.entrega,
       })));
 
-      const dadosSAC = { veiculos, contagem, jsonPlanilha, total: veiculos.length };
+      const dadosSAC = { veiculos, contagem, jsonPlanilha, total: veiculos.length, duplicatasRemovidas };
 
       // Persiste para uso no card de improdutivos
       AppStorage.set('sac_dados', dadosSAC);
@@ -687,7 +701,7 @@ function acoesDisponiveisParaStatus(status) {
  * @param {object[]} opts.veiculos      - lista de veículos processados
  * @param {boolean}  [opts.exigirFoto]  - se true, exige ao menos 1 foto por veículo (exceto Fora de Serviço)
  */
-function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigirFoto = false, idMap = null, onChange = null }) {
+function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigirFoto = false, idMap = null, onChange = null, placaEditavel = false }) {
   // Status, Ação e (condicionalmente) Foto são obrigatórios — Observação é livre
   const container   = document.getElementById(containerId);
   const hiddenInput = document.getElementById(hiddenInputId);
@@ -712,6 +726,7 @@ function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigi
       entrega: v.entrega,
       observacao: v.observacao || '',
       acao:    v.acao || '',
+      origem:  v.origem || 'Planilha',
       fotos:   (v.fotos || []).map(f => ({ base64: f.base64, mime: f.mime, nome: f.nome })),
     })));
     // Avisa quem chamou (ex: autosave de rascunho) que algo mudou —
@@ -737,7 +752,7 @@ function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigi
           <thead>
             <tr>
               <th style="${estiloTh}width:28px;">#</th>
-              <th style="${estiloTh}white-space:nowrap;">Placa</th>
+              <th style="${estiloTh}white-space:nowrap;">Placa <span style="color:#ffd">*</span></th>
               <th style="${estiloTh}">Status <span style="color:#ffd">*</span></th>
               <th style="${estiloTh}">Entrega <span style="color:#ffd">*</span></th>
               <th style="${estiloTh}">Observação</th>
@@ -753,11 +768,21 @@ function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigi
               <tr style="background:${bg};">
                 <td style="${estiloTd}color:#999;text-align:center;">${idx + 1}</td>
                 <td style="${estiloTd}font-weight:700;white-space:nowrap;">
-                  ${v.placa}
-                  ${(v.fotos || []).length < limiteFotos ? `
-                    <button type="button" class="foto-placa-btn" data-idx="${idx}" title="Tirar foto da placa"
-                      style="border:none;border-radius:5px;padding:2px 5px;cursor:pointer;font-size:.78rem;background:#f0f0f0;margin-left:4px;">📷</button>
-                  ` : ''}
+                  ${placaEditavel ? `
+                    <div style="display:flex;align-items:center;gap:4px;">
+                      <input type="text" data-idx="${idx}" data-field="placa"
+                        value="${(v.placa || '').replace(/"/g, '&quot;')}" placeholder="AAA-0000"
+                        style="font-size:.78rem;padding:4px 6px;border:1px solid ${v.placa && !placaValida(v.placa) ? '#c0392b' : '#ccc'};border-radius:5px;width:100%;min-width:100px;box-sizing:border-box;text-transform:uppercase;background:${v.placa && !placaValida(v.placa) ? '#fff5f5' : '#fff'};">
+                      <button type="button" class="scan-placa-tabela-btn" data-idx="${idx}" title="Escanear placa pela câmera"
+                        style="border:none;border-radius:5px;padding:5px 7px;cursor:pointer;font-size:.85rem;background:#f0f0f0;flex-shrink:0;">📷</button>
+                    </div>
+                  ` : `
+                    ${v.placa}
+                    ${(v.fotos || []).length < limiteFotos ? `
+                      <button type="button" class="foto-placa-btn" data-idx="${idx}" title="Tirar foto da placa"
+                        style="border:none;border-radius:5px;padding:2px 5px;cursor:pointer;font-size:.78rem;background:#f0f0f0;margin-left:4px;">📷</button>
+                    ` : ''}
+                  `}
                 </td>
                 <td style="${estiloTd}">
                   <select data-idx="${idx}" data-field="status"
@@ -851,6 +876,13 @@ function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigi
         el.addEventListener('input', () => {
           estado[parseInt(el.dataset.idx)][el.dataset.field] = el.value;
           salvarJSON();
+          // Placa: avisa na hora se o formato não bate com nenhum padrão
+          // brasileiro válido (evita texto aleatório digitado por engano).
+          if (el.dataset.field === 'placa') {
+            const preenchida = el.value.trim().length > 0;
+            el.style.borderColor = (preenchida && !placaValida(el.value)) ? '#c0392b' : '#ccc';
+            el.style.background  = (preenchida && !placaValida(el.value)) ? '#fff5f5' : '#fff';
+          }
         });
       }
     });
@@ -878,6 +910,24 @@ function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigi
     container.querySelectorAll('.foto-placa-btn').forEach(btn => {
       ativarCapturaFoto(btn, (dados) => adicionarFotoIdx(parseInt(btn.dataset.idx), dados), erroFoto, { capture: 'environment' });
     });
+    // Botão de câmera + OCR junto da placa (modo manual: a placa ainda não
+    // é conhecida, então tenta ler pela foto e preencher o campo sozinho).
+    // A foto é salva de qualquer forma, mesmo que o OCR não consiga ler.
+    container.querySelectorAll('.scan-placa-tabela-btn').forEach(btn => {
+      ativarCapturaFoto(btn, async (dados) => {
+        const idx = parseInt(btn.dataset.idx);
+        estado[idx].fotos = estado[idx].fotos || [];
+        if (estado[idx].fotos.length < limiteFotos) estado[idx].fotos.push(dados);
+
+        const placaLida = await tentarLerPlaca(dados.base64, dados.mime);
+        if (placaLida) estado[idx].placa = placaLida;
+
+        salvarJSON();
+        renderizar();
+
+        if (!placaLida) alert('Não foi possível ler a placa automaticamente. Digite a placa manualmente no campo.');
+      }, erroFoto, { capture: 'environment' });
+    });
     container.querySelectorAll('.foto-remover-item-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const idx = parseInt(btn.dataset.idx);
@@ -900,13 +950,16 @@ function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigi
     // não faz sentido exigir foto dele.
     const precisaFoto = v => exigirFoto && v.status !== 'Fora de Serviço';
     estado.forEach((v, idx) => {
-      if (!v.status) { erros.push(`Veículo ${idx+1} (${v.placa}): Status obrigatório.`); valido = false; }
-      if (!v.entrega) { erros.push(`Veículo ${idx+1} (${v.placa}): Dt. Prev. Entrega obrigatória.`); valido = false; }
-      if (!v.acao) { erros.push(`Veículo ${idx+1} (${v.placa}): Ação obrigatória.`); valido = false; }
-      if (precisaFoto(v) && (!v.fotos || v.fotos.length === 0)) { erros.push(`Veículo ${idx+1} (${v.placa}): Foto obrigatória.`); valido = false; }
+      const rotulo = v.placa ? v.placa : `#${idx + 1}`;
+      if (placaEditavel && !v.placa) { erros.push(`Veículo ${idx+1}: Placa obrigatória.`); valido = false; }
+      else if (placaEditavel && v.placa && !placaValida(v.placa)) { erros.push(`Veículo ${idx+1}: Placa "${v.placa}" não parece válida (formato esperado: AAA-0000 ou AAA0A00).`); valido = false; }
+      if (!v.status) { erros.push(`Veículo ${idx+1} (${rotulo}): Status obrigatório.`); valido = false; }
+      if (!v.entrega) { erros.push(`Veículo ${idx+1} (${rotulo}): Dt. Prev. Entrega obrigatória.`); valido = false; }
+      if (!v.acao) { erros.push(`Veículo ${idx+1} (${rotulo}): Ação obrigatória.`); valido = false; }
+      if (precisaFoto(v) && (!v.fotos || v.fotos.length === 0)) { erros.push(`Veículo ${idx+1} (${rotulo}): Foto obrigatória.`); valido = false; }
     });
     if (!valido) {
-      const idxErro = estado.findIndex(v => !v.status || !v.entrega || !v.acao || (precisaFoto(v) && (!v.fotos || v.fotos.length === 0)));
+      const idxErro = estado.findIndex(v => (placaEditavel && (!v.placa || !placaValida(v.placa))) || !v.status || !v.entrega || !v.acao || (precisaFoto(v) && (!v.fotos || v.fotos.length === 0)));
       if (idxErro >= 0) { paginaAtual = Math.floor(idxErro / POR_PAGINA); renderizar(); }
       alert('Corrija os campos antes de enviar:\n\n' + erros.slice(0,3).join('\n') + (erros.length > 3 ? `\n...e mais ${erros.length-3} erro(s).` : ''));
     }
@@ -1048,6 +1101,18 @@ async function tentarLerPlaca(base64, mime) {
   } finally {
     if (worker) { try { await worker.terminate(); } catch (_) {} }
   }
+}
+
+/**
+ * Confere se um texto É (inteiramente) uma placa brasileira válida — padrão
+ * antigo (AAA9999) ou Mercosul (AAA9A99), com ou sem traço. Diferente de
+ * extrairPlacaDoTexto() (que procura um trecho dentro de um texto maior,
+ * usado no OCR), esta valida o campo inteiro — pra pegar texto aleatório
+ * digitado por engano (ex: "1651", "48", "5").
+ */
+function placaValida(placa) {
+  const limpo = String(placa || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return /^[A-Z]{3}\d[A-Z]\d{2}$/.test(limpo) || /^[A-Z]{3}\d{4}$/.test(limpo);
 }
 
 /**

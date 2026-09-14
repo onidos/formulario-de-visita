@@ -466,9 +466,15 @@ document.addEventListener('DOMContentLoaded', () => {
         onChange:      () => salvarRascunho('18'),
       });
     } else {
-      if (modoSAC)    modoSAC.style.display    = 'none';
-      if (modoManual) modoManual.style.display  = 'block';
-      if (aviso)      aviso.style.display       = 'none';
+      // Sem veículos (Total = 0 no modo manual, ou arquivo importado sem
+      // linhas) — não faz sentido mostrar nenhuma tela de veículo, nem a
+      // tabela nem as antigas telas de Veículo 1/2/3 (obsoletas). Mostra um
+      // aviso simples e deixa ir direto pro envio.
+      const semVeiculosMsg = document.getElementById('sem-veiculos-msg');
+      if (modoSAC)        modoSAC.style.display        = 'none';
+      if (modoManual)      modoManual.style.display      = 'none';
+      if (semVeiculosMsg) semVeiculosMsg.style.display  = 'block';
+      if (aviso)           aviso.style.display           = 'none';
     }
   }
 
