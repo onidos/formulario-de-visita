@@ -71,7 +71,7 @@ class FormEngine {
 
   _bindNextButtons() {
     this.form.querySelectorAll('.next-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const card = this.currentCard();
         const nextId = btn.dataset.card;
 
@@ -81,9 +81,12 @@ class FormEngine {
           return;
         }
 
-        // Hook externo (validações específicas por página)
+        // Hook externo (validações específicas por página) — aceita tanto
+        // retorno síncrono (true/false) quanto uma Promise (ex: uma busca
+        // de rede que precisa terminar antes de avançar o card).
         if (this.options.onBeforeNext) {
-          const ok = this.options.onBeforeNext(card, nextId);
+          const resultado = this.options.onBeforeNext(card, nextId);
+          const ok = (resultado instanceof Promise) ? await resultado : resultado;
           if (ok === false) return;
         }
 
@@ -100,7 +103,7 @@ class FormEngine {
 
   _bindSimNaoButtons() {
     this.form.querySelectorAll('.sim-nao-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const card = btn.closest('.card');
         const cardId = card.id.replace('card-', '');
         const resposta = btn.dataset.value;
@@ -120,9 +123,10 @@ class FormEngine {
         }
         if (comentario) comentario.classList.remove('error');
 
-        // Hook externo
+        // Hook externo — também aceita retorno síncrono ou Promise.
         if (this.options.onBeforeSimNao) {
-          const ok = this.options.onBeforeSimNao(card, cardId, resposta, nextId);
+          const resultado = this.options.onBeforeSimNao(card, cardId, resposta, nextId);
+          const ok = (resultado instanceof Promise) ? await resultado : resultado;
           if (ok === false) return;
         }
 

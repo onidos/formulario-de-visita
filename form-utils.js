@@ -946,9 +946,15 @@ function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigi
   container._validarTodos = () => {
     let valido = true;
     const erros = [];
-    // Fora de Serviço = carro ainda não está fisicamente na oficina, então
-    // não faz sentido exigir foto dele.
-    const precisaFoto = v => exigirFoto && v.status !== 'Fora de Serviço';
+    // Duas situações em que o carro não está fisicamente na oficina, então
+    // não faz sentido exigir foto:
+    // 1) Fora de Serviço.
+    // 2) Em Serviço + "Aguardando retorno cliente Fleet/Livre/LP" — orçamento
+    //    já aprovado, mas o cliente ainda não trouxe/devolveu o carro.
+    const precisaFoto = v =>
+      exigirFoto &&
+      v.status !== 'Fora de Serviço' &&
+      !(v.status === 'Em Serviço' && v.acao === 'Aguardando retorno cliente Fleet/Livre/LP');
     estado.forEach((v, idx) => {
       const rotulo = v.placa ? v.placa : `#${idx + 1}`;
       if (placaEditavel && !v.placa) { erros.push(`Veículo ${idx+1}: Placa obrigatória.`); valido = false; }
@@ -1137,6 +1143,30 @@ async function fetchJSON(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
+}
+
+/**
+ * Busca o nome de um fornecedor (oficina) pelo CNPJ, consultando a aba
+ * "Fornecedores" via doGet do Apps Script. Se não achar, der erro, ou
+ * demorar demais (timeout), retorna null silenciosamente — o formulário
+ * simplesmente segue pro preenchimento manual normal, sem travar nem
+ * incomodar o analista com mensagem de erro.
+ */
+async function buscarNomeFornecedor(actionUrl, cnpj, timeoutMs = 6000) {
+  const cnpjLimpo = String(cnpj || '').replace(/\D/g, '');
+  if (!cnpjLimpo || !actionUrl) return null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${actionUrl}?cnpj=${cnpjLimpo}`, { signal: controller.signal });
+    if (!res.ok) return null;
+    const dados = await res.json();
+    return (dados && dados.encontrado && dados.nome) ? dados.nome : null;
+  } catch (err) {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function mostrarStatus(el, msg, tipo) {

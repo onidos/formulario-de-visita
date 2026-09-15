@@ -63,6 +63,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   aplicarMascaraCNPJ(document.getElementById('CNPJ_Oficina'));
 
+  // Busca o fornecedor pela base de CNPJ (aba "Fornecedores" na planilha)
+  // assim que o analista sai do campo — se achar, já preenche o Nome da
+  // Oficina (que fica logo acima nessa mesma tela). Se não achar, segue
+  // pro preenchimento manual normal, sem travar nem avisar nada.
+  document.getElementById('CNPJ_Oficina')?.addEventListener('blur', async () => {
+    const cnpjInput = document.getElementById('CNPJ_Oficina');
+    const lojaInput = document.getElementById('loja');
+    if (!cnpjInput?.value || lojaInput?.value.trim()) return; // já tem nome preenchido, não sobrescreve
+    const nome = await buscarNomeFornecedor(form.action, cnpjInput.value);
+    if (nome && lojaInput) lojaInput.value = nome;
+  });
+
   const enderecoInput  = document.getElementById('endereco');
   const latitudeInput  = document.getElementById('latitude');
   const longitudeInput = document.getElementById('longitude');
@@ -165,6 +177,12 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const card = engine.currentCard();
 
+      // Segunda camada de segurança: se por algum motivo chegou até aqui
+      // com Prospecção marcado mas ainda sobrou algo preenchido de veículo
+      // (ex: voltou e trocou o motivo depois de já ter preenchido), limpa
+      // de novo antes de montar o envio.
+      if (isProspeccao()) limparDadosVeiculosProspeccao();
+
       const tabelaContainer = document.getElementById('tabela-improdutivos');
       const modoSAC = document.getElementById('modo-sac');
       if (modoSAC && modoSAC.style.display !== 'none' && tabelaContainer?._validarTodos) {
@@ -263,7 +281,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (ta) ta.classList.remove('error');
     }
 
-    if (cardId === '8-alt' && isProspeccao()) { engine.showCard('8-fim'); return false; }
+    if (cardId === '8-alt' && isProspeccao()) {
+      limparDadosVeiculosProspeccao();
+      engine.showCard('8-fim');
+      return false;
+    }
 
     // Ao sair do card de fornecedores (16-alt), renderiza a tabela antes de mostrar card 17-alt
     if (cardId === '16-alt') {
@@ -437,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (aviso) {
         aviso.textContent = totalVeiculos > 25
           ? '⚠️ Placa, Status, Dt. Prev. Entrega e Ação são obrigatórios para todos os veículos. Com mais de 25 placas, a foto por veículo NÃO é obrigatória — só a foto da fachada continua exigida.'
-          : '⚠️ Placa, Status, Dt. Prev. Entrega e Ação são obrigatórios para todos os veículos. Foto é obrigatória em visitas presenciais, exceto para veículos "Fora de Serviço".';
+          : '⚠️ Placa, Status, Dt. Prev. Entrega e Ação são obrigatórios para todos os veículos. Foto é obrigatória em visitas presenciais, exceto para veículos "Fora de Serviço" ou "Em Serviço" com ação "Aguardando retorno cliente Fleet/Livre/LP".';
         aviso.style.display = 'block';
       }
 
@@ -487,9 +509,63 @@ document.addEventListener('DOMContentLoaded', () => {
     return Array.from(sel.selectedOptions).some(o => o.value === 'Prospecção');
   }
 
+  /**
+   * Prospecção não registra veículos — mas se o analista já tinha passado
+   * pelas telas de Quantidade de Veículos (preenchendo Total, etc.) com
+   * outro motivo antes de voltar e trocar pra Prospecção, esses valores
+   * ficavam "escondidos" nos campos e iam junto no envio (mesmo sem
+   * aparecer em tela nem pedir foto). Limpa tudo isso na hora que detecta
+   * Prospecção, pra não ir nada de veículo no envio.
+   */
+  function limparDadosVeiculosProspeccao() {
+    ['veiculos-manutencao', 'veiculos-fs', 'veiculos-aprovacao', 'veiculos-servico',
+     'veiculos-pecas', 'veiculos-orcamento', 'veiculos-entregues'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    ['veiculos-json', 'acoes-manual-json'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    [1, 2, 3].forEach(n => {
+      const placa = form.querySelector(`[name="placa${n}"]`);
+      if (placa) placa.value = '';
+      fotosManuais[n] = [];
+      atualizarHiddenFotos(n);
+    });
+    AppStorage.remove('sac_dados');
+    AppStorage.remove('modo_manual_ativo');
+
+    // Crucial: se a tabela de veículos já tinha sido criada numa passada
+    // anterior (ex: Auditoria com Total preenchido), ela guarda os dados
+    // numa closure em memória — limpar só o campo escondido não muda essa
+    // cópia interna. Sem isso, o botão de Enviar (que só verifica se
+    // #modo-sac está visível) continuava validando a tabela antiga por
+    // trás, mesmo com a tela de Prospecção sendo mostrada. Escondendo
+    // #modo-sac aqui garante que o envio nunca mais olhe pra ela.
+    const modoSAC = document.getElementById('modo-sac');
+    const modoManual = document.getElementById('modo-manual');
+    const semVeiculosMsg = document.getElementById('sem-veiculos-msg');
+    if (modoSAC)        modoSAC.style.display        = 'none';
+    if (modoManual)      modoManual.style.display      = 'none';
+    if (semVeiculosMsg) semVeiculosMsg.style.display  = 'none';
+  }
+
   function isPresencial() {
     return document.getElementById('presencial-telefone')?.value === 'Presencial';
   }
+
+  // Ouve a mudança no campo "Motivo" diretamente — assim que o status de
+  // Prospecção muda (virou Prospecção OU deixou de ser), limpa os dados de
+  // veículo na hora, não importa em qual card isso acontece depois. Mais
+  // robusto que depender só do ponto de saída do card 8-alt, que dependia
+  // da pessoa navegar por um caminho específico depois de voltar.
+  let prospeccaoAnterior = isProspeccao();
+  document.getElementById('motivo')?.addEventListener('change', () => {
+    const agora = isProspeccao();
+    if (agora !== prospeccaoAnterior) limparDadosVeiculosProspeccao();
+    prospeccaoAnterior = agora;
+  });
 
   function cardIdAtual() {
     return engine.currentCard()?.id.replace('card-', '') || '';

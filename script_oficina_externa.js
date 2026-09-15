@@ -167,6 +167,12 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const card = engine.currentCard();
 
+      // Segunda camada de segurança: se por algum motivo chegou até aqui
+      // com Prospecção marcado mas ainda sobrou algo preenchido de veículo
+      // (ex: voltou e trocou o motivo depois de já ter preenchido), limpa
+      // de novo antes de montar o envio.
+      if (isProspeccao()) limparDadosVeiculosProspeccao();
+
       // Modo SAC: valida tabela (serviço + comentário obrigatórios)
       const tabelaContainer = document.getElementById('tabela-improdutivos');
       const modoSAC = document.getElementById('modo-sac');
@@ -204,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupSubmit(document.getElementById('submit-btn-prospeccao'));
 
   // ── Validações ────────────────────────────────────────────
-  function validacaoEspecifica(card) {
+  async function validacaoEspecifica(card) {
     const cardId = card.id.replace('card-', '');
 
     // Card 100: foto da fachada obrigatória apenas em visitas presenciais
@@ -212,6 +218,24 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isPresencial() && fotosManuais.fachada.length === 0) {
         alert('Por favor, adicione uma foto da fachada da oficina (obrigatória para visitas presenciais).');
         return false;
+      }
+
+      // Busca o fornecedor pela base de CNPJ (aba "Fornecedores" na
+      // planilha) — se achar, já preenche o nome da oficina no próximo
+      // card. Se não achar (ou a busca falhar/demorar), segue normal pro
+      // preenchimento manual, sem travar nem avisar nada.
+      const cnpjInput = document.getElementById('CNPJ_Oficina');
+      const btnProximo = card.querySelector('.next-btn');
+      const textoOriginal = btnProximo?.textContent;
+      if (btnProximo) { btnProximo.disabled = true; btnProximo.textContent = 'Buscando fornecedor…'; }
+      try {
+        const nome = await buscarNomeFornecedor(form.action, cnpjInput?.value);
+        if (nome) {
+          const lojaInput = document.getElementById('loja');
+          if (lojaInput) lojaInput.value = nome;
+        }
+      } finally {
+        if (btnProximo) { btnProximo.disabled = false; btnProximo.textContent = textoOriginal; }
       }
     }
 
@@ -278,7 +302,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (ta) ta.classList.remove('error');
     }
 
-    if (cardId === '9' && isProspeccao()) { engine.showCard('9-fim'); return false; }
+    if (cardId === '9' && isProspeccao()) {
+      limparDadosVeiculosProspeccao();
+      engine.showCard('9-fim');
+      return false;
+    }
 
     // Ao sair do card de fornecedores (17), renderiza a tabela antes de mostrar card 18
     if (cardId === '17') {
@@ -452,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (aviso) {
         aviso.textContent = totalVeiculos > 25
           ? '⚠️ Placa, Status, Dt. Prev. Entrega e Ação são obrigatórios para todos os veículos. Com mais de 25 placas, a foto por veículo NÃO é obrigatória — só a foto da fachada continua exigida.'
-          : '⚠️ Placa, Status, Dt. Prev. Entrega e Ação são obrigatórios para todos os veículos. Foto é obrigatória em visitas presenciais, exceto para veículos "Fora de Serviço".';
+          : '⚠️ Placa, Status, Dt. Prev. Entrega e Ação são obrigatórios para todos os veículos. Foto é obrigatória em visitas presenciais, exceto para veículos "Fora de Serviço" ou "Em Serviço" com ação "Aguardando retorno cliente Fleet/Livre/LP".';
         aviso.style.display = 'block';
       }
 
@@ -502,9 +530,63 @@ document.addEventListener('DOMContentLoaded', () => {
     return Array.from(sel.selectedOptions).some(o => o.value === 'Prospecção');
   }
 
+  /**
+   * Prospecção não registra veículos — mas se o analista já tinha passado
+   * pelas telas de Quantidade de Veículos (preenchendo Total, etc.) com
+   * outro motivo antes de voltar e trocar pra Prospecção, esses valores
+   * ficavam "escondidos" nos campos e iam junto no envio (mesmo sem
+   * aparecer em tela nem pedir foto). Limpa tudo isso na hora que detecta
+   * Prospecção, pra não ir nada de veículo no envio.
+   */
+  function limparDadosVeiculosProspeccao() {
+    ['veiculos-total', 'veiculos-orcamento', 'veiculos-pendentes', 'veiculos-aprovados',
+     'veiculos-aguardando', 'veiculos-FS', 'veiculos-entregues'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    ['veiculos-json', 'acoes-manual-json'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    [1, 2, 3].forEach(n => {
+      const placa = form.querySelector(`[name="placa${n}"]`);
+      if (placa) placa.value = '';
+      fotosManuais[n] = [];
+      atualizarHiddenFotos(n);
+    });
+    AppStorage.remove('sac_dados');
+    AppStorage.remove('modo_manual_ativo');
+
+    // Crucial: se a tabela de veículos já tinha sido criada numa passada
+    // anterior (ex: Auditoria com Total preenchido), ela guarda os dados
+    // numa closure em memória — limpar só o campo escondido não muda essa
+    // cópia interna. Sem isso, o botão de Enviar (que só verifica se
+    // #modo-sac está visível) continuava validando a tabela antiga por
+    // trás, mesmo com a tela de Prospecção sendo mostrada. Escondendo
+    // #modo-sac aqui garante que o envio nunca mais olhe pra ela.
+    const modoSAC = document.getElementById('modo-sac');
+    const modoManual = document.getElementById('modo-manual');
+    const semVeiculosMsg = document.getElementById('sem-veiculos-msg');
+    if (modoSAC)        modoSAC.style.display        = 'none';
+    if (modoManual)      modoManual.style.display      = 'none';
+    if (semVeiculosMsg) semVeiculosMsg.style.display  = 'none';
+  }
+
   function isPresencial() {
     return document.getElementById('presencial-telefone')?.value === 'Presencial';
   }
+
+  // Ouve a mudança no campo "Motivo" diretamente — assim que o status de
+  // Prospecção muda (virou Prospecção OU deixou de ser), limpa os dados de
+  // veículo na hora, não importa em qual card isso acontece depois. Mais
+  // robusto que depender só do ponto de saída do card 9, que dependia da
+  // pessoa navegar por um caminho específico depois de voltar.
+  let prospeccaoAnterior = isProspeccao();
+  document.getElementById('motivo')?.addEventListener('change', () => {
+    const agora = isProspeccao();
+    if (agora !== prospeccaoAnterior) limparDadosVeiculosProspeccao();
+    prospeccaoAnterior = agora;
+  });
 
   function cardIdAtual() {
     return engine.currentCard()?.id.replace('card-', '') || '';
