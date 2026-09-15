@@ -411,7 +411,11 @@ async function tentarReenviarBackup() {
   const dados = LocalBackup.obter();
   if (!dados) return null;
   const resultado = await postFormulario(dados.actionUrl, dados.campos, 45000);
-  if (resultado.confirmado && resultado.planilha === 'ok') { LocalBackup.limpar(); RascunhoVisita.limpar(); }
+  if (resultado.confirmado && resultado.planilha === 'ok') {
+    LocalBackup.limpar();
+    RascunhoVisita.limpar();
+    AppStorage.remove('envio_id_atual');
+  }
   return resultado;
 }
 
@@ -421,9 +425,17 @@ async function enviarFormulario(form, btn) {
   btn.dataset.textoOriginal = btn.textContent;
   btn.textContent = 'Enviando…';
 
-  // ID único deste envio: se cair a conexão e o analista reenviar depois, o
-  // servidor usa esse ID pra reconhecer que já processou e não duplicar a linha.
-  const envioId = gerarEnvioId();
+  // ID único desta VISITA (não deste clique!) — gerado uma única vez e
+  // reaproveitado em qualquer nova tentativa dentro da mesma sessão,
+  // mesmo que o analista dê F5 ou clique em Enviar de novo achando que
+  // deu erro. Sem isso, cada tentativa gerava um ID diferente e o
+  // servidor não reconhecia como duplicata, processando (e mandando
+  // e-mail) mais de uma vez pra mesma visita.
+  let envioId = AppStorage.get('envio_id_atual');
+  if (!envioId) {
+    envioId = gerarEnvioId();
+    AppStorage.set('envio_id_atual', envioId);
+  }
   const campos  = Array.from(new FormData(form).entries());
   campos.push(['envio_id', envioId]);
 
@@ -438,7 +450,11 @@ async function enviarFormulario(form, btn) {
   const resultado = await postFormulario(form.action, campos, 45000);
 
   // Só apaga o backup quando temos confirmação real de que a planilha foi gravada.
-  if (resultado.confirmado && resultado.planilha === 'ok') { LocalBackup.limpar(); RascunhoVisita.limpar(); }
+  if (resultado.confirmado && resultado.planilha === 'ok') {
+    LocalBackup.limpar();
+    RascunhoVisita.limpar();
+    AppStorage.remove('envio_id_atual');
+  }
 
   AppStorage.set('submit_result', resultado);
   window.location.href = 'sucesso.html';
