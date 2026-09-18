@@ -1185,6 +1185,80 @@ async function buscarNomeFornecedor(actionUrl, cnpj, timeoutMs = 6000) {
   }
 }
 
+// Busca a lista de nomes cadastrados na aba "Usuarios" da planilha, para
+// sugerir no campo "Nome Completo" do Analista (autocomplete via <datalist>).
+// Nunca bloqueia nem trava o formulário — se falhar, devolve lista vazia e o
+// campo continua funcionando normalmente como texto livre.
+async function buscarListaUsuarios(actionUrl, timeoutMs = 6000) {
+  if (!actionUrl) return [];
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${actionUrl}?usuarios=1`, { signal: controller.signal });
+    if (!res.ok) return [];
+    const dados = await res.json();
+    return (dados && Array.isArray(dados.usuarios)) ? dados.usuarios : [];
+  } catch (err) {
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Preenche um <datalist> com a lista de nomes buscada, ligando-o (via
+// atributo list) ao campo de texto informado — mantém o campo 100% editável,
+// a lista é só sugestão.
+function popularDatalistUsuarios(datalistEl, inputEl, nomes) {
+  if (!datalistEl) return;
+  datalistEl.innerHTML = '';
+  (nomes || []).forEach(nome => {
+    const opt = document.createElement('option');
+    opt.value = nome;
+    datalistEl.appendChild(opt);
+  });
+  if (inputEl && datalistEl.id) inputEl.setAttribute('list', datalistEl.id);
+}
+
+// ── Cache local da lista de Usuarios (evita esperar a planilha toda vez) ──
+const CACHE_USUARIOS_KEY = 'unidas_usuarios_cache_v1';
+
+function obterUsuariosCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_USUARIOS_KEY);
+    if (!raw) return null;
+    const dados = JSON.parse(raw);
+    return Array.isArray(dados.nomes) ? dados.nomes : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+function salvarUsuariosCache(nomes) {
+  try {
+    localStorage.setItem(CACHE_USUARIOS_KEY, JSON.stringify({ nomes, atualizadoEm: Date.now() }));
+  } catch (err) {
+    // localStorage indisponível/cheio — sem problema, só não fica com cache
+  }
+}
+
+// Popula o datalist do Analista instantaneamente com a última lista salva
+// neste aparelho (se houver) e, em paralelo, busca a lista atualizada na
+// planilha — quando chega, atualiza o datalist e o cache. Assim o analista
+// nunca espera: na primeiríssima vez que abrir num aparelho novo, digita
+// livre sem sugestão; da segunda vez em diante a sugestão já aparece na
+// hora, e fica se atualizando sozinha em segundo plano.
+function carregarSugestoesAnalistas(actionUrl, datalistEl, inputEl) {
+  const cache = obterUsuariosCache();
+  if (cache && cache.length) popularDatalistUsuarios(datalistEl, inputEl, cache);
+
+  buscarListaUsuarios(actionUrl).then(nomes => {
+    if (nomes && nomes.length) {
+      popularDatalistUsuarios(datalistEl, inputEl, nomes);
+      salvarUsuariosCache(nomes);
+    }
+  });
+}
+
 function mostrarStatus(el, msg, tipo) {
   if (!el) return;
   el.textContent = msg;
