@@ -139,6 +139,15 @@ document.addEventListener('DOMContentLoaded', () => {
     statusId: 'import-sac-vol-status',
     idMap: idMapContagemVeiculos,
     onImportado: (dados) => {
+      // Limpa a tabela antiga (se houver) — sem isso, reimportar uma planilha
+      // (ex: corrigindo o arquivo errado) não atualizava a tela: a tabela
+      // priorizava o que já estava salvo do import anterior e ignorava os
+      // dados novos.
+      const hiddenTabela = document.getElementById('veiculos-json');
+      if (hiddenTabela) hiddenTabela.value = '';
+      const hiddenAcoes = document.getElementById('acoes-manual-json');
+      if (hiddenAcoes) hiddenAcoes.value = '';
+
       atualizarPrevFornecedores();
       // Mostra feedback no card-10b antes de navegar
       const statusEl = document.getElementById('import-sac-vol-status');
@@ -219,6 +228,15 @@ document.addEventListener('DOMContentLoaded', () => {
   async function validacaoEspecifica(card) {
     const cardId = card.id.replace('card-', '');
 
+    // Card 4: em Prospecção, pula a pergunta "visita completa?" (card 4b) —
+    // toda visita de Prospecção é a primeira visita à oficina, então é
+    // sempre considerada completa (não faz sentido perguntar).
+    if (cardId === '4' && isProspeccao()) {
+      document.getElementById('visita-completa-hidden').value = 'Sim';
+      engine.showCard('5');
+      return false;
+    }
+
     // Card 100: foto da fachada obrigatória apenas em visitas presenciais
     if (cardId === '100') {
       if (isPresencial() && fotosManuais.fachada.length === 0) {
@@ -238,7 +256,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const nome = await buscarNomeFornecedor(form.action, cnpjInput?.value);
         if (nome) {
           const lojaInput = document.getElementById('loja');
-          if (lojaInput) lojaInput.value = nome;
+          // Confere de novo aqui (não só antes da busca) — se a pessoa digitou
+          // o nome da oficina manualmente enquanto a busca rodava, não
+          // sobrescreve o que ela digitou.
+          if (lojaInput && !lojaInput.value.trim()) lojaInput.value = nome;
         }
       } finally {
         if (btnProximo) { btnProximo.disabled = false; btnProximo.textContent = textoOriginal; }
@@ -314,9 +335,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return false;
     }
 
-    // Ao sair do card de fornecedores (17), renderiza a tabela antes de mostrar card 18
+    // Ao sair do card de fornecedores (17), renderiza a tabela antes de mostrar
+    // card 18. IMPORTANTE: precisa ser síncrono (sem setTimeout) — senão existia
+    // uma brecha de ~50ms em que o card 18 já aparecia mas a tabela ainda não
+    // tinha sido montada, deixando passar um envio sem veículo nenhum (mesmo
+    // bug do Total "sumindo", só que por um caminho diferente).
     if (cardId === '17') {
-      setTimeout(() => renderizarImprodutivos(), 50);
+      renderizarImprodutivos();
     }
   }
 
@@ -377,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ativarCapturaFoto(btn, (dados) => salvarFotoManual(btn.dataset.target, dados), erroFotoManual, { capture: 'environment' });
   });
   document.querySelectorAll('.foto-manual-galeria-btn').forEach(btn => {
-    ativarCapturaFoto(btn, (dados) => salvarFotoManual(btn.dataset.target, dados), erroFotoManual);
+    ativarCapturaFoto(btn, (dados) => salvarFotoManual(btn.dataset.target, dados), erroFotoManual, { multiplo: true });
   });
 
   // ── Scanner de placa (câmera dedicada, ao lado do campo) ──
@@ -458,11 +483,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const modoManual = document.getElementById('modo-manual');
     const aviso      = document.getElementById('aviso-servico-obrig');
 
-    // Modo manual: até aqui só sabíamos QUE era manual (flag marcada no
-    // clique do botão) — agora, chegando neste ponto do fluxo, o Total já
-    // foi preenchido de verdade (cards 10-16, logo antes de Fornecedores).
-    // Gera as linhas em branco agora, na quantidade certa.
-    if (!dados && AppStorage.get('modo_manual_ativo')) {
+    // Gera as linhas em branco (modo manual) sempre que não há dados de SAC
+    // importado — isso cobre tanto quem escolheu "Preenchimento Manual" no
+    // card 10b quanto quem fez uma visita completa (Sim), caminho que pula
+    // direto de 9 pra 10 e NUNCA passa pelo card 10b. Sem esse fallback, a
+    // visita completa (o caminho mais comum) nunca marcava modo_manual_ativo
+    // e a tabela de veículos ficava sempre vazia — o Total aparecia certo em
+    // "Volume de Veículos", mas nenhum veículo, ação ou foto era registrado.
+    // Chegando neste ponto do fluxo, o Total já foi preenchido de verdade
+    // (cards 10-16, logo antes de Fornecedores).
+    if (!dados) {
       const total = parseInt(document.getElementById('veiculos-total')?.value, 10) || 0;
       if (total > 0) {
         const veiculosVazios = Array.from({ length: total }, () => ({
@@ -610,6 +640,10 @@ document.addEventListener('DOMContentLoaded', () => {
       tipoOficina: AppStorage.get('tipo_oficina') || '',
       cardAtual:   cardId,
       valores:     coletarValoresForm(form),
+      extra: {
+        modoManualAtivo: !!AppStorage.get('modo_manual_ativo'),
+        sacDados:        AppStorage.get('sac_dados') || null,
+      },
     });
   }
 
@@ -627,6 +661,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!rascunho || !rascunho.valores) return;
 
     restaurarValoresForm(form, rascunho.valores);
+
+    // Restaura os flags de modo (modo_manual_ativo / sac_dados) que vivem no
+    // AppStorage (sessionStorage) e não fazem parte dos campos do form — se
+    // a sessão caiu (app fechado, tela travou) antes de sobreviverem
+    // sozinhos, sem isso o sistema achava "sem veículo nenhum" e pulava a
+    // exigência de placas/fotos, mesmo com o Total já preenchido.
+    if (rascunho.extra) {
+      if (rascunho.extra.modoManualAtivo) AppStorage.set('modo_manual_ativo', true);
+      if (rascunho.extra.sacDados && !AppStorage.get('sac_dados')) {
+        AppStorage.set('sac_dados', rascunho.extra.sacDados);
+      }
+    }
 
     // Reconstrói fotosManuais (1/2/3/fachada) a partir dos hidden
     // restaurados, pra manter as miniaturas e os próximos "adicionar foto"

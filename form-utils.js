@@ -96,21 +96,29 @@ const AppStorage = {
 // a planilha foi gravada. Isso permite reenviar sem redigitar tudo se a conexão
 // cair ou o app for fechado no meio do envio.
 const LocalBackup = {
-  KEY: 'unidas_visita_pendente_v1',
+  // A chave inclui o tipo de oficina (Externa / Interna-Móvel). Sem isso, se
+  // o mesmo celular/navegador for usado pra visitar os dois tipos de oficina
+  // e um envio falhar em cada um antes do reenvio automático dar certo, o
+  // segundo backup sobrescrevia (e perdia) o primeiro — os dois usavam a
+  // mesma chave fixa no localStorage.
+  chave() {
+    const tipo = AppStorage.get('tipo_oficina') || 'geral';
+    return 'unidas_visita_pendente_v1__' + tipo;
+  },
   salvar({ actionUrl, campos, tipoOficina, nomeOficina, envioId }) {
     try {
       const dados = { criadoEm: new Date().toISOString(), actionUrl, campos, tipoOficina, nomeOficina, envioId };
-      localStorage.setItem(this.KEY, JSON.stringify(dados));
+      localStorage.setItem(this.chave(), JSON.stringify(dados));
     } catch (err) { console.warn('Falha ao salvar backup local:', err); }
   },
   obter() {
     try {
-      const raw = localStorage.getItem(this.KEY);
+      const raw = localStorage.getItem(this.chave());
       return raw ? JSON.parse(raw) : null;
     } catch (err) { return null; }
   },
   limpar() {
-    try { localStorage.removeItem(this.KEY); } catch (err) {}
+    try { localStorage.removeItem(this.chave()); } catch (err) {}
   },
 };
 
@@ -126,9 +134,16 @@ const RascunhoVisita = {
   KEY: 'unidas_rascunho_visita_v1',
   IDADE_MAXIMA_MS: 24 * 60 * 60 * 1000, // 24h — depois disso, ignora e descarta
 
-  salvar({ tipoOficina, cardAtual, valores }) {
+  // "extra" carrega flags que vivem no AppStorage (sessionStorage) — como
+  // modo_manual_ativo e sac_dados — e que NÃO fazem parte dos campos do
+  // formulário. Sem isso, se a sessão cair (app fechado, celular travou)
+  // bem entre escolher "Preenchimento Manual" e editar a tabela, o rascunho
+  // restaurado perdia esses flags e o sistema achava que não tinha veículo
+  // nenhum, pulando a exigência de placas/fotos mesmo com o Total já
+  // preenchido. Ver restaurarRascunhoSeExistir() nos scripts das páginas.
+  salvar({ tipoOficina, cardAtual, valores, extra }) {
     try {
-      const dados = { tipoOficina, cardAtual, valores, salvoEm: new Date().toISOString() };
+      const dados = { tipoOficina, cardAtual, valores, extra: extra || null, salvoEm: new Date().toISOString() };
       localStorage.setItem(this.KEY, JSON.stringify(dados));
     } catch (err) {
       // Provável estouro de cota do localStorage (muitas fotos grandes).
@@ -919,7 +934,7 @@ function inicializarTabelaVeiculos({ containerId, hiddenInputId, veiculos, exigi
       ativarCapturaFoto(btn, (dados) => adicionarFotoIdx(parseInt(btn.dataset.idx), dados), erroFoto, { capture: 'environment' });
     });
     container.querySelectorAll('.foto-galeria-btn').forEach(btn => {
-      ativarCapturaFoto(btn, (dados) => adicionarFotoIdx(parseInt(btn.dataset.idx), dados), erroFoto);
+      ativarCapturaFoto(btn, (dados) => adicionarFotoIdx(parseInt(btn.dataset.idx), dados), erroFoto, { multiplo: true });
     });
     // Botão de câmera junto da placa: mesma função de salvar foto do
     // veículo, sem OCR (a placa já veio do arquivo, não precisa ser lida).
@@ -1079,6 +1094,12 @@ function comprimirFoto(file, { maxLargura = FOTO_MAX_LARGURA, qualidade = FOTO_Q
  * @param {string} [opcoes.capture] - 'environment' força a câmera traseira a abrir
  *        direto (sem passar pelo seletor de galeria). Omitir abre o seletor padrão
  *        do sistema, que em muitos Android atuais só mostra a galeria.
+ * @param {boolean} [opcoes.multiplo] - permite escolher várias fotos de uma vez
+ *        (só faz sentido pra galeria — câmera continua tirando uma por vez).
+ *        Cada foto escolhida chama onFoto() separadamente, na ordem em que
+ *        foi selecionada, como se a pessoa tivesse repetido o processo pra
+ *        cada uma — então limites (ex: máximo de fotos) continuam valendo
+ *        normalmente.
  */
 function ativarCapturaFoto(elemento, onFoto, onErro, opcoes = {}) {
   elemento.addEventListener('click', () => {
@@ -1086,17 +1107,20 @@ function ativarCapturaFoto(elemento, onFoto, onErro, opcoes = {}) {
     input.type = 'file';
     input.accept = 'image/*';
     if (opcoes.capture) input.setAttribute('capture', opcoes.capture);
+    if (opcoes.multiplo) input.multiple = true;
     input.style.display = 'none';
     document.body.appendChild(input);
     input.addEventListener('change', async () => {
-      const file = input.files[0];
+      const arquivos = Array.from(input.files || []);
       input.remove();
-      if (!file) return;
-      try {
-        const dados = await comprimirFoto(file);
-        onFoto(dados);
-      } catch (err) {
-        if (onErro) onErro(err.message);
+      if (!arquivos.length) return;
+      for (const file of arquivos) {
+        try {
+          const dados = await comprimirFoto(file);
+          onFoto(dados);
+        } catch (err) {
+          if (onErro) onErro(err.message);
+        }
       }
     });
     input.click();

@@ -78,17 +78,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const lojaInput = document.getElementById('loja');
     if (!cnpjInput?.value || lojaInput?.value.trim()) return; // já tem nome preenchido, não sobrescreve
     const nome = await buscarNomeFornecedor(form.action, cnpjInput.value);
-    if (nome && lojaInput) lojaInput.value = nome;
+    // Confere de novo aqui (não só antes da busca) — se a pessoa digitou o
+    // nome da oficina manualmente enquanto a busca rodava, não sobrescreve.
+    if (nome && lojaInput && !lojaInput.value.trim()) lojaInput.value = nome;
   });
 
   const enderecoInput  = document.getElementById('endereco');
   const latitudeInput  = document.getElementById('latitude');
   const longitudeInput = document.getElementById('longitude');
+  const cidadeInput    = document.getElementById('cidade-input');
 
   document.getElementById('get-location')?.addEventListener('click', () =>
-    obterLocalizacao({ enderecoInput, latitudeInput, longitudeInput })
+    obterLocalizacao({ enderecoInput, latitudeInput, longitudeInput, cidadeInput })
   );
-  if (enderecoInput) inicializarAutocomplete({ enderecoInput, latitudeInput, longitudeInput });
+  if (enderecoInput) inicializarAutocomplete({ enderecoInput, latitudeInput, longitudeInput, cidadeInput });
 
   document.getElementById('home-btn')?.addEventListener('click', () => {
     window.location.href = 'index_visita_oficina.html';
@@ -151,6 +154,15 @@ document.addEventListener('DOMContentLoaded', () => {
     statusId: 'import-sac-vol-status',
     idMap: idMapContagemVeiculos,
     onImportado: (dados) => {
+      // Limpa a tabela antiga (se houver) — sem isso, reimportar uma planilha
+      // (ex: corrigindo o arquivo errado) não atualizava a tela: a tabela
+      // priorizava o que já estava salvo do import anterior e ignorava os
+      // dados novos.
+      const hiddenTabela = document.getElementById('veiculos-json');
+      if (hiddenTabela) hiddenTabela.value = '';
+      const hiddenAcoes = document.getElementById('acoes-manual-json');
+      if (hiddenAcoes) hiddenAcoes.value = '';
+
       atualizarPrevFornecedores();
       const statusEl = document.getElementById('import-sac-vol-status');
       if (statusEl) {
@@ -228,6 +240,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function validacaoEspecifica(card) {
     const cardId = card.id.replace('card-', '');
 
+    // Card 4: em Prospecção, pula a pergunta "visita completa?" (card 4b) —
+    // toda visita de Prospecção é a primeira visita à oficina, então é
+    // sempre considerada completa (não faz sentido perguntar).
+    if (cardId === '4' && isProspeccao()) {
+      document.getElementById('visita-completa-hidden').value = 'Sim';
+      engine.showCard('5');
+      return false;
+    }
+
     // Card 2: foto da fachada obrigatória apenas em visitas presenciais
     if (cardId === '2') {
       if (isPresencial() && fotosManuais.fachada.length === 0) {
@@ -249,6 +270,18 @@ document.addEventListener('DOMContentLoaded', () => {
         engine.showCard('16-alt');
         return false;
       }
+    }
+
+    if (cardId === '14-alt') {
+      const ids  = ['veiculos-manutencao','veiculos-fs','veiculos-aprovacao','veiculos-servico','veiculos-pecas','veiculos-orcamento'];
+      const vals = ids.map(id => parseInt(document.getElementById(id)?.value) || 0);
+      const soma = vals[1] + vals[2] + vals[3] + vals[4] + vals[5];
+      if (soma !== vals[0]) {
+        ids.forEach(id => document.getElementById(id)?.classList.add('error'));
+        alert(`A soma dos veículos (${soma}) não corresponde ao total (${vals[0]}).`);
+        return false;
+      }
+      ids.forEach(id => document.getElementById(id)?.classList.remove('error'));
     }
 
     if (cardId === '15-alt') {
@@ -293,9 +326,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return false;
     }
 
-    // Ao sair do card de fornecedores (16-alt), renderiza a tabela antes de mostrar card 17-alt
+    // Ao sair do card de fornecedores (16-alt), renderiza a tabela antes de
+    // mostrar card 17-alt. IMPORTANTE: precisa ser síncrono (sem setTimeout) —
+    // senão existia uma brecha de ~50ms em que o card 17-alt já aparecia mas a
+    // tabela ainda não tinha sido montada, deixando passar um envio sem
+    // veículo nenhum (mesmo bug do Total "sumindo", só que por um caminho
+    // diferente).
     if (cardId === '16-alt') {
-      setTimeout(() => renderizarImprodutivos(), 50);
+      renderizarImprodutivos();
     }
   }
 
@@ -356,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ativarCapturaFoto(btn, (dados) => salvarFotoManual(btn.dataset.target, dados), erroFotoManual, { capture: 'environment' });
   });
   document.querySelectorAll('.foto-manual-galeria-btn').forEach(btn => {
-    ativarCapturaFoto(btn, (dados) => salvarFotoManual(btn.dataset.target, dados), erroFotoManual);
+    ativarCapturaFoto(btn, (dados) => salvarFotoManual(btn.dataset.target, dados), erroFotoManual, { multiplo: true });
   });
 
   // ── Scanner de placa (câmera dedicada, ao lado do campo) ──
@@ -437,11 +475,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const modoManual = document.getElementById('modo-manual');
     const aviso      = document.getElementById('aviso-servico-obrig');
 
-    // Modo manual: até aqui só sabíamos QUE era manual (flag marcada no
-    // clique do botão) — agora, chegando neste ponto do fluxo, o Total já
-    // foi preenchido de verdade (cards 9-alt a 15-alt, logo antes de
-    // Fornecedores). Gera as linhas em branco agora, na quantidade certa.
-    if (!dados && AppStorage.get('modo_manual_ativo')) {
+    // Gera as linhas em branco (modo manual) sempre que não há dados de SAC
+    // importado — isso cobre tanto quem escolheu "Preenchimento Manual" no
+    // card 9b-alt quanto quem fez uma visita completa (Sim), caminho que
+    // pula direto pra 9-alt e NUNCA passa pelo card 9b-alt. Sem esse
+    // fallback, a visita completa (o caminho mais comum) nunca marcava
+    // modo_manual_ativo e a tabela de veículos ficava sempre vazia — o
+    // Total aparecia certo em "Volume de Veículos", mas nenhum veículo,
+    // ação ou foto era registrado. Chegando neste ponto do fluxo, o Total
+    // já foi preenchido de verdade (cards 9-alt a 15-alt, antes de Fornecedores).
+    if (!dados) {
       const total = parseInt(document.getElementById('veiculos-manutencao')?.value, 10) || 0;
       if (total > 0) {
         const veiculosVazios = Array.from({ length: total }, () => ({
@@ -589,6 +632,10 @@ document.addEventListener('DOMContentLoaded', () => {
       tipoOficina: AppStorage.get('tipo_oficina') || '',
       cardAtual:   cardId,
       valores:     coletarValoresForm(form),
+      extra: {
+        modoManualAtivo: !!AppStorage.get('modo_manual_ativo'),
+        sacDados:        AppStorage.get('sac_dados') || null,
+      },
     });
   }
 
@@ -606,6 +653,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!rascunho || !rascunho.valores) return;
 
     restaurarValoresForm(form, rascunho.valores);
+
+    // Restaura os flags de modo (modo_manual_ativo / sac_dados) que vivem no
+    // AppStorage (sessionStorage) e não fazem parte dos campos do form — se
+    // a sessão caiu (app fechado, tela travou) antes de sobreviverem
+    // sozinhos, sem isso o sistema achava "sem veículo nenhum" e pulava a
+    // exigência de placas/fotos, mesmo com o Total já preenchido.
+    if (rascunho.extra) {
+      if (rascunho.extra.modoManualAtivo) AppStorage.set('modo_manual_ativo', true);
+      if (rascunho.extra.sacDados && !AppStorage.get('sac_dados')) {
+        AppStorage.set('sac_dados', rascunho.extra.sacDados);
+      }
+    }
 
     // Reconstrói fotosManuais (1/2/3/fachada) a partir dos hidden
     // restaurados, pra manter as miniaturas e os próximos "adicionar foto"
