@@ -1187,8 +1187,16 @@ function extrairPlacaDoTexto(texto) {
 }
 
 // ── Helpers internos ─────────────────────────────────────────────────────────
+// O Nominatim (OpenStreetMap) nem sempre classifica o ponto pela fronteira
+// de "cidade" — em municípios grandes/capitais (ex: Fortaleza) às vezes só
+// resolve a fronteira do "município" (campo separado), deixando city/town/
+// village vazios mesmo com a cidade certinha no endereço completo. Por isso
+// a cadeia de fallback inclui municipality e mais alguns campos que o
+// Nominatim usa dependendo de como aquele trecho está mapeado no OSM.
 function extrairCidade(address = {}) {
-  return address.city || address.town || address.village || '';
+  return address.city || address.town || address.village
+    || address.municipality || address.city_district
+    || address.county || '';
 }
 
 async function fetchJSON(url) {
