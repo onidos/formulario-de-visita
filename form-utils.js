@@ -1225,7 +1225,7 @@ async function buscarNomeFornecedor(actionUrl, cnpj, timeoutMs = 6000) {
 // travar o campo "Nome Completo" do Analista só nos nomes cadastrados (via
 // <select>) — não é mais sugestão, é a única forma de preencher o campo,
 // pra evitar nome de oficina, apelido ou abreviação digitados por engano.
-async function buscarListaUsuarios(actionUrl, timeoutMs = 6000) {
+async function buscarListaUsuarios(actionUrl, timeoutMs = 15000) {
   if (!actionUrl) return [];
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -1294,17 +1294,34 @@ function salvarUsuariosCache(nomes) {
   }
 }
 
+function esperar(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Busca a lista de usuários com novas tentativas automáticas — a primeira
+// chamada ao Apps Script costuma ser lenta pra "esquentar" (mais ainda em
+// rede móvel), então uma falha isolada não deve travar o campo de cara.
+async function buscarListaUsuariosComRetentativa(actionUrl, tentativas = 3) {
+  for (let i = 0; i < tentativas; i++) {
+    const nomes = await buscarListaUsuarios(actionUrl);
+    if (nomes && nomes.length) return nomes;
+    if (i < tentativas - 1) await esperar(2000);
+  }
+  return [];
+}
+
 // Popula o select do Analista instantaneamente com a última lista salva
 // neste aparelho (se houver) e, em paralelo, busca a lista atualizada na
 // planilha — quando chega, atualiza o select e o cache. Se não houver cache
-// e a busca falhar (sem internet, planilha fora do ar), o campo fica
-// travado com um aviso e um link pra tentar de novo — diferente do
-// datalist antigo, agora não dá pra digitar o nome livremente.
+// e a busca falhar mesmo após novas tentativas (sem internet, planilha fora
+// do ar), o campo fica travado com um aviso e um link pra tentar de novo —
+// diferente do datalist antigo, agora não dá pra digitar o nome livremente.
 function carregarSugestoesAnalistas(actionUrl, selectEl, statusEl) {
   const cache = obterUsuariosCache();
   if (cache && cache.length) popularSelectAnalistas(selectEl, cache);
+  else if (statusEl) mostrarStatus(statusEl, 'Carregando lista de analistas… pode levar alguns segundos.', 'info');
 
-  buscarListaUsuarios(actionUrl).then(nomes => {
+  buscarListaUsuariosComRetentativa(actionUrl).then(nomes => {
     if (nomes && nomes.length) {
       popularSelectAnalistas(selectEl, nomes);
       salvarUsuariosCache(nomes);
