@@ -63,11 +63,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   aplicarMascaraCNPJ(document.getElementById('CNPJ_Oficina'));
 
-  // Sugestão de nomes no campo "Nome Completo" do Analista, a partir da aba
-  // "Usuarios" da planilha. Usa cache local (aparece na hora, sem esperar a
-  // planilha) e atualiza sozinho em segundo plano. Não bloqueia nada — se a
-  // busca falhar ou demorar, o campo continua funcionando como texto livre.
-  carregarSugestoesAnalistas(form.action, document.getElementById('lista-analistas'), document.getElementById('nome'));
+  // Campo "Nome Completo" do Analista travado na lista da aba "Usuarios" da
+  // planilha (não é mais texto livre). Usa cache local (aparece na hora, sem
+  // esperar a planilha) e atualiza sozinho em segundo plano.
+  carregarSugestoesAnalistas(form.action, document.getElementById('nome'), document.getElementById('nome-status'));
 
   const enderecoInput  = document.getElementById('endereco');
   const latitudeInput  = document.getElementById('latitude');
@@ -266,7 +265,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Card 10: se total = 0 pula direto para fornecedores (sem perguntar modo)
+    // Card 10: se total = 0, pula as perguntas de detalhamento e pede a
+    // justificativa da visita (motivo já garantidamente ≠ Prospecção aqui —
+    // Prospecção nunca chega até este card, sai antes pelo card 9).
     if (cardId === '10') {
       const total = parseInt(document.getElementById('veiculos-total')?.value) || 0;
       if (total === 0) {
@@ -276,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (el) el.value = '0';
         });
         AppStorage.remove('sac_dados');
-        engine.showCard('17');
+        engine.showCard('10z');
         return false;
       }
     }

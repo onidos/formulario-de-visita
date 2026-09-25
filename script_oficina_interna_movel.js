@@ -63,11 +63,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   aplicarMascaraCNPJ(document.getElementById('CNPJ_Oficina'));
 
-  // Sugestão de nomes no campo "Nome Completo" do Analista, a partir da aba
-  // "Usuarios" da planilha. Usa cache local (aparece na hora, sem esperar a
-  // planilha) e atualiza sozinho em segundo plano. Não bloqueia nada — se a
-  // busca falhar ou demorar, o campo continua funcionando como texto livre.
-  carregarSugestoesAnalistas(form.action, document.getElementById('lista-analistas'), document.getElementById('nome'));
+  // Campo "Nome Completo" do Analista travado na lista da aba "Usuarios" da
+  // planilha (não é mais texto livre). Usa cache local (aparece na hora, sem
+  // esperar a planilha) e atualiza sozinho em segundo plano.
+  carregarSugestoesAnalistas(form.action, document.getElementById('nome'), document.getElementById('nome-status'));
 
   // Busca o fornecedor pela base de CNPJ (aba "Fornecedores" na planilha)
   // assim que o analista sai do campo — se achar, já preenche o Nome da
@@ -257,7 +256,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Card 9-alt: se total = 0 pula direto para fornecedores
+    // Card 9-alt: se total = 0, pula as perguntas de detalhamento e pede a
+    // justificativa da visita (motivo já garantidamente ≠ Prospecção aqui).
     if (cardId === '9-alt') {
       const total = parseInt(document.getElementById('veiculos-manutencao')?.value) || 0;
       if (total === 0) {
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (el) el.value = '0';
         });
         AppStorage.remove('sac_dados');
-        engine.showCard('16-alt');
+        engine.showCard('justificativa-alt');
         return false;
       }
     }

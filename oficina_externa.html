@@ -25,8 +25,10 @@
         <h2>Analista</h2>
         <div class="input-group">
           <label for="nome">Nome Completo</label>
-          <input type="text" id="nome" autocomplete="name" name="entry.277269067" required data-minlength="5" data-onlyletters="true" list="lista-analistas">
-          <datalist id="lista-analistas"></datalist>
+          <select id="nome" name="entry.277269067" required disabled>
+            <option value="" disabled selected>Carregando lista de analistas…</option>
+          </select>
+          <p id="nome-status" style="font-size:.78rem;margin-top:4px;"></p>
         </div>
         <div class="navigation-buttons">
           <button type="button" class="next-btn" data-card="0b">Próximo</button>
@@ -306,6 +308,20 @@
         </div>
       </div>
 
+      <!-- Card 10z: Justificativa (sem veículo na oficina e motivo ≠ Prospecção) -->
+      <div class="card" id="card-10z" style="display:none">
+        <h3>Área 2 | Informações Sobre Oficina Externa</h3>
+        <h2>Justificativa da Visita</h2>
+        <div class="input-group">
+          <label for="justificativa-zero">Não há veículo na oficina e o motivo da visita não é Prospecção — descreva o motivo desta visita.</label>
+          <textarea id="justificativa-zero" name="entry.justificativa_visita_zero" rows="4" required placeholder="Descreva o motivo da visita…"></textarea>
+        </div>
+        <div class="navigation-buttons">
+          <button type="button" class="prev-btn" data-card="10">Anterior</button>
+          <button type="button" class="next-btn" data-card="17">Próximo</button>
+        </div>
+      </div>
+
       <!-- Card 11: Pendentes orçamento -->
       <div class="card" id="card-11" style="display:none">
         <h3>Área 2 | Informações Sobre Oficina Externa</h3>
@@ -452,7 +468,6 @@
                       <option value="Fora de Serviço">Fora de Serviço</option>
                       <option value="Pend. Orçamento">Pend. Orçamento</option>
                       <option value="Pend. Aprovação">Pend. Aprovação</option>
-                      <option value="Erro Material">Erro Material</option>
                       <option value="Pend. Peça">Pend. Peça</option>
                       <option value="Em Serviço">Em Serviço</option>
                     </select>
@@ -497,7 +512,6 @@
                       <option value="Fora de Serviço">Fora de Serviço</option>
                       <option value="Pend. Orçamento">Pend. Orçamento</option>
                       <option value="Pend. Aprovação">Pend. Aprovação</option>
-                      <option value="Erro Material">Erro Material</option>
                       <option value="Pend. Peça">Pend. Peça</option>
                       <option value="Em Serviço">Em Serviço</option>
                     </select>
@@ -542,7 +556,6 @@
                       <option value="Fora de Serviço">Fora de Serviço</option>
                       <option value="Pend. Orçamento">Pend. Orçamento</option>
                       <option value="Pend. Aprovação">Pend. Aprovação</option>
-                      <option value="Erro Material">Erro Material</option>
                       <option value="Pend. Peça">Pend. Peça</option>
                       <option value="Em Serviço">Em Serviço</option>
                     </select>

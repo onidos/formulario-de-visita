@@ -1222,9 +1222,9 @@ async function buscarNomeFornecedor(actionUrl, cnpj, timeoutMs = 6000) {
 }
 
 // Busca a lista de nomes cadastrados na aba "Usuarios" da planilha, para
-// sugerir no campo "Nome Completo" do Analista (autocomplete via <datalist>).
-// Nunca bloqueia nem trava o formulário — se falhar, devolve lista vazia e o
-// campo continua funcionando normalmente como texto livre.
+// travar o campo "Nome Completo" do Analista só nos nomes cadastrados (via
+// <select>) — não é mais sugestão, é a única forma de preencher o campo,
+// pra evitar nome de oficina, apelido ou abreviação digitados por engano.
 async function buscarListaUsuarios(actionUrl, timeoutMs = 6000) {
   if (!actionUrl) return [];
   const controller = new AbortController();
@@ -1241,18 +1241,35 @@ async function buscarListaUsuarios(actionUrl, timeoutMs = 6000) {
   }
 }
 
-// Preenche um <datalist> com a lista de nomes buscada, ligando-o (via
-// atributo list) ao campo de texto informado — mantém o campo 100% editável,
-// a lista é só sugestão.
-function popularDatalistUsuarios(datalistEl, inputEl, nomes) {
-  if (!datalistEl) return;
-  datalistEl.innerHTML = '';
-  (nomes || []).forEach(nome => {
+// Preenche o <select> do Analista com a lista de nomes cadastrados,
+// em ordem alfabética. Mantém a seleção atual se o nome já escolhido
+// ainda estiver na lista nova (evita perder o que o analista já marcou
+// quando a lista é atualizada em segundo plano).
+function popularSelectAnalistas(selectEl, nomes) {
+  if (!selectEl) return;
+  const valorAtual = selectEl.value;
+  const ordenados = (nomes || []).slice().sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+  selectEl.innerHTML = '';
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.disabled = true;
+  placeholder.textContent = 'Selecione seu nome';
+  selectEl.appendChild(placeholder);
+
+  ordenados.forEach(nome => {
     const opt = document.createElement('option');
     opt.value = nome;
-    datalistEl.appendChild(opt);
+    opt.textContent = nome;
+    selectEl.appendChild(opt);
   });
-  if (inputEl && datalistEl.id) inputEl.setAttribute('list', datalistEl.id);
+
+  if (valorAtual && ordenados.includes(valorAtual)) {
+    selectEl.value = valorAtual;
+  } else {
+    placeholder.selected = true;
+  }
+  selectEl.disabled = ordenados.length === 0;
 }
 
 // ── Cache local da lista de Usuarios (evita esperar a planilha toda vez) ──
@@ -1277,20 +1294,36 @@ function salvarUsuariosCache(nomes) {
   }
 }
 
-// Popula o datalist do Analista instantaneamente com a última lista salva
+// Popula o select do Analista instantaneamente com a última lista salva
 // neste aparelho (se houver) e, em paralelo, busca a lista atualizada na
-// planilha — quando chega, atualiza o datalist e o cache. Assim o analista
-// nunca espera: na primeiríssima vez que abrir num aparelho novo, digita
-// livre sem sugestão; da segunda vez em diante a sugestão já aparece na
-// hora, e fica se atualizando sozinha em segundo plano.
-function carregarSugestoesAnalistas(actionUrl, datalistEl, inputEl) {
+// planilha — quando chega, atualiza o select e o cache. Se não houver cache
+// e a busca falhar (sem internet, planilha fora do ar), o campo fica
+// travado com um aviso e um link pra tentar de novo — diferente do
+// datalist antigo, agora não dá pra digitar o nome livremente.
+function carregarSugestoesAnalistas(actionUrl, selectEl, statusEl) {
   const cache = obterUsuariosCache();
-  if (cache && cache.length) popularDatalistUsuarios(datalistEl, inputEl, cache);
+  if (cache && cache.length) popularSelectAnalistas(selectEl, cache);
 
   buscarListaUsuarios(actionUrl).then(nomes => {
     if (nomes && nomes.length) {
-      popularDatalistUsuarios(datalistEl, inputEl, nomes);
+      popularSelectAnalistas(selectEl, nomes);
       salvarUsuariosCache(nomes);
+      if (statusEl) statusEl.textContent = '';
+    } else if (!cache || !cache.length) {
+      if (selectEl) selectEl.disabled = true;
+      if (statusEl) {
+        statusEl.innerHTML = '';
+        mostrarStatus(statusEl, 'Não foi possível carregar a lista de analistas. ', 'erro');
+        const retry = document.createElement('a');
+        retry.href = '#';
+        retry.textContent = 'Tentar novamente';
+        retry.onclick = (e) => {
+          e.preventDefault();
+          statusEl.textContent = '';
+          carregarSugestoesAnalistas(actionUrl, selectEl, statusEl);
+        };
+        statusEl.appendChild(retry);
+      }
     }
   });
 }
