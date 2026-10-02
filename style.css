@@ -76,6 +76,23 @@ body {
   }
 }
 
+/* Último card (tabela de Veículos no Improdutivo): bem mais largo que os
+   demais, só enquanto esse card está em tela — form-engine.js adiciona essa
+   classe ao .container via JS quando detecta a tabela/cards de veículo
+   dentro do card exibido. Os outros cards mantêm o tamanho normal acima. */
+@media (min-width: 1024px) {
+  .container.container--larga {
+    max-width: 1400px;
+    width: min(96vw, 1400px);
+  }
+}
+@media (min-width: 1440px) {
+  .container.container--larga {
+    max-width: 1600px;
+    width: min(94vw, 1600px);
+  }
+}
+
 .container::before {
   content: '';
   position: absolute;

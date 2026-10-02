@@ -44,6 +44,17 @@ class FormEngine {
     const first = target.querySelector('input:not([type="hidden"]):not([disabled]), select, textarea');
     if (first) setTimeout(() => first.focus(), 50);
 
+    // Card com a tabela de veículos (SAC) ou os cards de veículo manuais:
+    // alarga o container só enquanto esse card estiver em tela (ver
+    // .container--larga no style.css) — os demais cards mantêm o tamanho
+    // normal. Detecta pelo conteúdo do card, não pelo ID, pra funcionar
+    // igual na oficina externa (card-18) e na interna/móvel (card-17-alt).
+    const container = this.form.closest('.container');
+    if (container) {
+      const ehCardDeVeiculos = !!target.querySelector('#tabela-improdutivos, .vehicle-cards');
+      container.classList.toggle('container--larga', ehCardDeVeiculos);
+    }
+
     // Hook opcional: chamado toda vez que um card é exibido (next/prev/sim-nao
     // ou showCard direto) — usado pelo autosave de rascunho, entre outras coisas.
     // Roda ANTES do scroll (abaixo) de propósito: scroll é só cosmético, não
@@ -52,7 +63,7 @@ class FormEngine {
 
     // Scroll suave ao topo do container
     try {
-      this.form.closest('.container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      container?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (errScroll) { /* nunca deixa isso quebrar a navegação */ }
   }
 
